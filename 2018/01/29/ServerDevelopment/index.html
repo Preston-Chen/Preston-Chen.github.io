@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html style="display: none;" lang="en">
+    <head>
+    <meta charset="utf-8">
+    <!--
+        © Material Theme
+        https://github.com/viosey/hexo-theme-material
+        Version: 1.5.2 -->
+    <script>
+        window.materialVersion = "1.5.2"
+        // Delete localstorage with these tags
+        window.oldVersion = [
+            'codestartv1',
+            '1.3.4',
+            '1.4.0',
+            '1.4.0b1',
+            '1.5.0'
+        ]
+    </script>
+
+    <!-- dns prefetch -->
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Meta & Info -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!-- Title -->
+    
+    <title>
+        
+            网络通信的底层开发-服务端 | 
+        
+        Preston
+    </title>
+
+    <!-- Favicons -->
+    <link rel="icon shortcut" type="image/ico" href="/img/favicon.png">
+    <link rel="icon" href="/img/favicon.png">
+
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="description" itemprop="description" content="">
+    <meta name="keywords" content="">
+    <meta name="theme-color" content="#0097A7">
+
+    <!-- Disable Fucking Bloody Baidu Tranformation -->
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <!--[if lte IE 9]>
+        <link rel="stylesheet" href="/css/ie-blocker.css">
+
+        
+            <script src="/js/ie-blocker.en.js"></script>
+        
+    <![endif]-->
+
+    <!-- Import lsloader -->
+    <script>(function(){window.lsloader={jsRunSequence:[],jsnamemap:{},cssnamemap:{}};lsloader.removeLS=function(a){try{localStorage.removeItem(a)}catch(b){}};lsloader.setLS=function(a,c){try{localStorage.setItem(a,c)}catch(b){}};lsloader.getLS=function(a){var c="";try{c=localStorage.getItem(a)}catch(b){c=""}return c};versionString="/*"+(window.materialVersion||"unknownVersion")+"*/";lsloader.clean=function(){try{var b=[];for(var a=0;a<localStorage.length;a++){b.push(localStorage.key(a))}b.forEach(function(e){var f=lsloader.getLS(e);if(window.oldVersion){var d=window.oldVersion.reduce(function(g,h){return g||f.indexOf("/*"+h+"*/")!==-1},false);if(d){lsloader.removeLS(e)}}})}catch(c){}};lsloader.clean();lsloader.load=function(f,a,b,d){if(typeof b==="boolean"){d=b;b=undefined}d=d||false;b=b||function(){};var e;e=this.getLS(f);if(e&&e.indexOf(versionString)===-1){this.removeLS(f);this.requestResource(f,a,b,d);return}if(e){var c=e.split(versionString)[0];if(c!=a){console.log("reload:"+a);this.removeLS(f);this.requestResource(f,a,b,d);return}e=e.split(versionString)[1];if(d){this.jsRunSequence.push({name:f,code:e});this.runjs(a,f,e)}else{document.getElementById(f).appendChild(document.createTextNode(e));b()}}else{this.requestResource(f,a,b,d)}};lsloader.requestResource=function(b,e,a,c){var d=this;if(c){this.iojs(e,b,function(h,f,g){d.setLS(f,h+versionString+g);d.runjs(h,f,g)})}else{this.iocss(e,b,function(f){document.getElementById(b).appendChild(document.createTextNode(f));d.setLS(b,e+versionString+f)},a)}};lsloader.iojs=function(d,b,g){var a=this;a.jsRunSequence.push({name:b,code:""});try{var f=new XMLHttpRequest();f.open("get",d,true);f.onreadystatechange=function(){if(f.readyState==4){if((f.status>=200&&f.status<300)||f.status==304){if(f.response!=""){g(d,b,f.response);return}}a.jsfallback(d,b)}};f.send(null)}catch(c){a.jsfallback(d,b)}};lsloader.iocss=function(f,c,h,a){var b=this;try{var g=new XMLHttpRequest();g.open("get",f,true);g.onreadystatechange=function(){if(g.readyState==4){if((g.status>=200&&g.status<300)||g.status==304){if(g.response!=""){h(g.response);a();return}}b.cssfallback(f,c,a)}};g.send(null)}catch(d){b.cssfallback(f,c,a)}};lsloader.iofonts=function(f,c,h,a){var b=this;try{var g=new XMLHttpRequest();g.open("get",f,true);g.onreadystatechange=function(){if(g.readyState==4){if((g.status>=200&&g.status<300)||g.status==304){if(g.response!=""){h(g.response);a();return}}b.cssfallback(f,c,a)}};g.send(null)}catch(d){b.cssfallback(f,c,a)}};lsloader.runjs=function(f,c,e){if(!!c&&!!e){for(var b in this.jsRunSequence){if(this.jsRunSequence[b].name==c){this.jsRunSequence[b].code=e}}}if(!!this.jsRunSequence[0]&&!!this.jsRunSequence[0].code&&this.jsRunSequence[0].status!="failed"){var a=document.createElement("script");a.appendChild(document.createTextNode(this.jsRunSequence[0].code));a.type="text/javascript";document.getElementsByTagName("head")[0].appendChild(a);this.jsRunSequence.shift();if(this.jsRunSequence.length>0){this.runjs()}}else{if(!!this.jsRunSequence[0]&&this.jsRunSequence[0].status=="failed"){var d=this;var a=document.createElement("script");a.src=this.jsRunSequence[0].path;a.type="text/javascript";this.jsRunSequence[0].status="loading";a.onload=function(){d.jsRunSequence.shift();if(d.jsRunSequence.length>0){d.runjs()}};document.body.appendChild(a)}}};lsloader.tagLoad=function(b,a){this.jsRunSequence.push({name:a,code:"",path:b,status:"failed"});this.runjs()};lsloader.jsfallback=function(c,b){if(!!this.jsnamemap[b]){return}else{this.jsnamemap[b]=b}for(var a in this.jsRunSequence){if(this.jsRunSequence[a].name==b){this.jsRunSequence[a].code="";this.jsRunSequence[a].status="failed";this.jsRunSequence[a].path=c}}this.runjs()};lsloader.cssfallback=function(e,c,b){if(!!this.cssnamemap[c]){return}else{this.cssnamemap[c]=1}var d=document.createElement("link");d.type="text/css";d.href=e;d.rel="stylesheet";d.onload=d.onerror=b;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(d,a)};lsloader.runInlineScript=function(c,b){var a=document.getElementById(b).innerText;this.jsRunSequence.push({name:c,code:a});this.runjs()}})();</script>
+
+    <!-- Import queue -->
+    <script>function Queue(){this.dataStore=[];this.offer=b;this.poll=d;this.execNext=a;this.debug=false;this.startDebug=c;function b(e){if(this.debug){console.log("Offered a Queued Function.")}if(typeof e==="function"){this.dataStore.push(e)}else{console.log("You must offer a function.")}}function d(){if(this.debug){console.log("Polled a Queued Function.")}return this.dataStore.shift()}function a(){var e=this.poll();if(e!==undefined){if(this.debug){console.log("Run a Queued Function.")}e()}}function c(){this.debug=true}}var queue=new Queue();</script>
+
+    <!-- Import CSS -->
+    
+        <style id="material_css"></style><script>if(typeof window.lsLoadCSSMaxNums === "undefined")window.lsLoadCSSMaxNums = 0;window.lsLoadCSSMaxNums++;lsloader.load("material_css","/css/material.min.css?Z7a72R1E4SxzBKR/WGctOA==",function(){if(typeof window.lsLoadCSSNums === "undefined")window.lsLoadCSSNums = 0;window.lsLoadCSSNums++;if(window.lsLoadCSSNums == window.lsLoadCSSMaxNums)document.documentElement.style.display="";}, false)</script>
+        <style id="style_css"></style><script>if(typeof window.lsLoadCSSMaxNums === "undefined")window.lsLoadCSSMaxNums = 0;window.lsLoadCSSMaxNums++;lsloader.load("style_css","/css/style.min.css?MKetZV3cUTfDxvMffaOezg==",function(){if(typeof window.lsLoadCSSNums === "undefined")window.lsLoadCSSNums = 0;window.lsLoadCSSNums++;if(window.lsLoadCSSNums == window.lsLoadCSSMaxNums)document.documentElement.style.display="";}, false)</script>
+
+        
+
+    
+
+    
+
+    <!-- Config CSS -->
+
+<!-- Other Styles -->
+<style>
+  body, html {
+    font-family: Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    overflow-x: hidden !important;
+  }
+  
+  code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  }
+
+  a {
+    color: #00838F;
+  }
+
+  .mdl-card__media,
+  #search-label,
+  #search-form-label:after,
+  #scheme-Paradox .hot_tags-count,
+  #scheme-Paradox .sidebar_archives-count,
+  #scheme-Paradox .sidebar-colored .sidebar-header,
+  #scheme-Paradox .sidebar-colored .sidebar-badge{
+    background-color: #0097A7 !important;
+  }
+
+  /* Sidebar User Drop Down Menu Text Color */
+  #scheme-Paradox .sidebar-colored .sidebar-nav>.dropdown>.dropdown-menu>li>a:hover,
+  #scheme-Paradox .sidebar-colored .sidebar-nav>.dropdown>.dropdown-menu>li>a:focus {
+    color: #0097A7 !important;
+  }
+
+  #post_entry-right-info,
+  .sidebar-colored .sidebar-nav li:hover > a,
+  .sidebar-colored .sidebar-nav li:hover > a i,
+  .sidebar-colored .sidebar-nav li > a:hover,
+  .sidebar-colored .sidebar-nav li > a:hover i,
+  .sidebar-colored .sidebar-nav li > a:focus i,
+  .sidebar-colored .sidebar-nav > .open > a,
+  .sidebar-colored .sidebar-nav > .open > a:hover,
+  .sidebar-colored .sidebar-nav > .open > a:focus,
+  #ds-reset #ds-ctx .ds-ctx-entry .ds-ctx-head a {
+    color: #0097A7 !important;
+  }
+
+  .toTop {
+    background: #757575 !important;
+  }
+
+  .material-layout .material-post>.material-nav,
+  .material-layout .material-index>.material-nav,
+  .material-nav a {
+    color: #757575;
+  }
+
+  #scheme-Paradox .MD-burger-layer {
+    background-color: #757575;
+  }
+
+  #scheme-Paradox #post-toc-trigger-btn {
+    color: #757575;
+  }
+
+  .post-toc a:hover {
+    color: #00838F;
+    text-decoration: underline;
+  }
+
+</style>
+
+
+<!-- Theme Background Related-->
+
+    <style>
+      body{
+        background-image: url(/img/bg.png);
+      }
+    </style>
+
+
+
+
+<!-- Fade Effect -->
+
+    <style>
+      .fade {
+        transition: all 800ms linear;
+        -webkit-transform: translate3d(0,0,0);
+        -moz-transform: translate3d(0,0,0);
+        -ms-transform: translate3d(0,0,0);
+        -o-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        opacity: 1;
+      }
+
+      .fade.out{
+        opacity: 0;
+      }
+    </style>
+
+
+<!-- Import Font -->
+<!-- Import Roboto -->
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+
+
+<!-- Import Material Icons -->
+
+
+    <style id="material_icons"></style><script>if(typeof window.lsLoadCSSMaxNums === "undefined")window.lsLoadCSSMaxNums = 0;window.lsLoadCSSMaxNums++;lsloader.load("material_icons","/css/material-icons.css?pqhB/Rd/ab0H2+kZp0RDmw==",function(){if(typeof window.lsLoadCSSNums === "undefined")window.lsLoadCSSNums = 0;window.lsLoadCSSNums++;if(window.lsLoadCSSNums == window.lsLoadCSSMaxNums)document.documentElement.style.display="";}, false)</script>
+
+
+
+
+    <!-- Import jQuery -->
+    
+        <script>lsloader.load("jq_js","/js/jquery.min.js?qcusAULNeBksqffqUM2+Ig==", true)</script>
+    
+
+    <!-- WebAPP Icons -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Preston">
+    <meta name="msapplication-starturl" content="http://yoursite.com/2018/01/29/ServerDevelopment/">
+    <meta name="msapplication-navbutton-color" content="#0097A7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Preston">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="/img/favicon.png">
+
+    <!-- Site Verification -->
+    <meta name="google-site-verification" content="6fINUhXBoM6J3SMyMUftivP9xsMBCQ0YREdTY9cOCHw" />
+    <meta name="baidu-site-verification" content="sfcMzbdPmT" />
+
+    <!-- RSS -->
+    
+
+    <!-- The Open Graph protocol -->
+    <meta property="og:url" content="http://yoursite.com/2018/01/29/ServerDevelopment/">
+    <meta property="og:type" content="blog">
+    <meta property="og:title" content="网络通信的底层开发-服务端 | Preston">
+    <meta property="og:image" content="/img/favicon.png">
+    <meta property="og:description" content="">
+    
+
+    
+        <meta property="article:published_time" content="Mon Jan 29 2018 09:55:10 GMT+0800">
+        <meta property="article:modified_time" content="Fri Mar 09 2018 22:35:46 GMT+0800">
+    
+
+    <!-- The Twitter Card protocol -->
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Add canonical link for SEO -->
+    
+        <link rel="canonical" href="http://yoursite.com/2018/01/29/ServerDevelopment/index.html" />
+    
+
+    <!-- Structured-data for SEO -->
+    
+        
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": "http://yoursite.com/2018/01/29/ServerDevelopment/index.html",
+    "headline": "网络通信的底层开发-服务端",
+    "datePublished": "Mon Jan 29 2018 09:55:10 GMT+0800",
+    "dateModified": "Fri Mar 09 2018 22:35:46 GMT+0800",
+    "author": {
+        "@type": "Person",
+        "name": "preston",
+        "image": {
+            "@type": "ImageObject",
+            "url": "/img/avatar.png"
+        },
+        "description": ""
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Preston",
+        "logo": {
+            "@type":"ImageObject",
+            "url": "/img/favicon.png"
+        }
+    },
+    "keywords": "",
+    "description": "",
+}
+</script>
+
+
+    
+
+    <!-- Analytics -->
+    
+    
+    
+
+    <!-- Custom Head -->
+    
+
+</head>
+
+
+    
+        <body id="scheme-Paradox" class="lazy">
+            <div class="material-layout  mdl-js-layout has-drawer is-upgraded">
+                
+
+                <!-- Main Container -->
+                <main class="material-layout__content" id="main">
+
+                    <!-- Top Anchor -->
+                    <div id="top"></div>
+
+                    
+                        <!-- Hamburger Button -->
+                        <button class="MD-burger-icon sidebar-toggle">
+                            <span class="MD-burger-layer"></span>
+                        </button>
+                    
+
+                    <!-- Post TOC -->
+
+    
+    <!-- Back Button -->
+    <!--
+    <div class="material-back" id="backhome-div" tabindex="0">
+        <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon"
+           href="#" onclick="window.history.back();return false;"
+           target="_self"
+           role="button"
+           data-upgraded=",MaterialButton,MaterialRipple">
+            <i class="material-icons" role="presentation">arrow_back</i>
+            <span class="mdl-button__ripple-container">
+                <span class="mdl-ripple"></span>
+            </span>
+        </a>
+    </div>
+    -->
+
+
+    <!-- Left aligned menu below button -->
+    
+    
+    <button id="post-toc-trigger-btn"
+        class="mdl-button mdl-js-button mdl-button--icon">
+        <i class="material-icons">format_list_numbered</i>
+    </button>
+
+    <ul class="post-toc-wrap mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="post-toc-trigger-btn" style="max-height:80vh; overflow-y:scroll;">
+        <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ServerStart-Class"><span class="post-toc-number">1.</span> <span class="post-toc-text">ServerStart Class</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#UserToken-Class"><span class="post-toc-number">2.</span> <span class="post-toc-text">UserToken Class</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#UserTokenPool"><span class="post-toc-number">3.</span> <span class="post-toc-text">UserTokenPool</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#CodingDelegate"><span class="post-toc-number">4.</span> <span class="post-toc-text">CodingDelegate</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#LengthEncoding"><span class="post-toc-number">5.</span> <span class="post-toc-text">LengthEncoding</span></a></li></ol>
+    </ul>
+    
+
+
+
+
+<!-- Layouts -->
+
+    <!-- Post Module -->
+    <div class="material-post_container">
+
+        <div class="material-post mdl-grid">
+            <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
+
+                <!-- Post Header(Thumbnail & Title) -->
+                
+    <!-- Paradox Post Header -->
+    
+        <!-- Custom Thumbnail -->
+        <div class="post_thumbnail-custom mdl-card__media mdl-color-text--grey-50" style="background-image:url(/img/random/material-20.png)">
+    
+            <p class="article-headline-p">
+                网络通信的底层开发-服务端
+            </p>
+        </div>
+
+
+
+
+
+                
+                    <!-- Paradox Post Info -->
+                    <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
+
+    <!-- Author Avatar -->
+    <div id="author-avatar">
+        <img src="/img/avatar.png" width="44px" height="44px" alt="Author Avatar"/>
+    </div>
+    <!-- Author Name & Date -->
+    <div>
+        <strong>preston</strong>
+        <span>Jan 29, 2018</span>
+    </div>
+
+    <div class="section-spacer"></div>
+
+    <!-- Favorite -->
+    <!--
+        <button id="article-functions-like-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon btn-like">
+            <i class="material-icons" role="presentation">favorite</i>
+            <span class="visuallyhidden">favorites</span>
+        </button>
+    -->
+
+    <!-- Qrcode -->
+    
+
+    <!-- Tags (bookmark) -->
+    
+
+    <!-- Share -->
+    
+        <button id="article-fuctions-share-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+    <i class="material-icons" role="presentation">share</i>
+    <span class="visuallyhidden">share</span>
+</button>
+<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="article-fuctions-share-button">
+    
+
+    
+
+    <!-- Share Weibo -->
+    
+
+    <!-- Share Twitter -->
+    
+
+    <!-- Share Facebook -->
+    
+
+    <!-- Share Google+ -->
+    
+
+    <!-- Share LinkedIn -->
+    
+
+    <!-- Share QQ -->
+    
+
+    <!-- Share Telegram -->
+    
+</ul>
+
+    
+</div>
+
+                
+
+                <!-- Post Content -->
+                <div id="post-content" class="mdl-color-text--grey-700 mdl-card__supporting-text fade out">
+    
+        <p><img src="http://oj8x3nb07.bkt.clouddn.com/Blog/ServerDevelopment1.jpg" alt=""></p>
+<h1 id="ServerStart-Class"><a href="#ServerStart-Class" class="headerlink" title="ServerStart Class"></a>ServerStart Class</h1><hr>
+<pre><code>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetFrame
+{
+   public class ServerStart
+    {
+       Socket server;//服务器socket监听对象
+       int maxClient;//最大客户端连接数
+       Semaphore acceptClients;
+       UserTokenPool pool;
+
+       public LengthEncode LE;
+       public LengthDecode LD;
+       public encode encode;
+       public decode decode;
+       /// &lt;summary&gt;
+       /// 初始化通信监听
+       /// &lt;/summary&gt;
+       /// &lt;param name=&quot;port&quot;&gt;监听端口&lt;/param&gt;
+       public ServerStart(int max) {
+           //实例化监听对象
+           server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+           //设定服务器最大连接人数
+           maxClient = max;
+           //创建连接池
+           pool = new UserTokenPool(max);
+           //连接信号量
+           acceptClients = new Semaphore(max, max);
+           for (int i = 0; i &lt; max; i++) {
+               UserToken token = new UserToken();
+               //初始化token信息               
+               token.receiveSAEA.Completed += new EventHandler&lt;SocketAsyncEventArgs&gt;(IO_Comleted);               
+               token.sendSAEA.Completed += new EventHandler&lt;SocketAsyncEventArgs&gt;(IO_Comleted);
+               token.LD = LD;
+               token.LE = LE;
+               token.encode = encode;
+               token.decode = decode;
+               token.sendProcess = ProcessSend;
+
+               pool.push(token);
+           }
+       }
+
+       public void Start(int port) {
+           //监听当前服务器网卡所有可用IP地址的port端口
+           // 外网IP  内网IP192.168.x.x 本机IP一个127.0.0.1
+           server.Bind(new IPEndPoint(IPAddress.Any, port));
+           //置于监听状态
+           server.Listen(10);
+           StartAccept(null);
+       }
+       /// &lt;summary&gt;
+       /// 开始客户端连接监听
+       /// &lt;/summary&gt;
+       public void StartAccept(SocketAsyncEventArgs e) {
+           //如果当前传入为空  说明调用新的客户端连接监听事件 否则的话 移除当前客户端连接
+           if (e == null)
+           {
+               e = new SocketAsyncEventArgs();
+               e.Completed += new EventHandler&lt;SocketAsyncEventArgs&gt;(Accept_Comleted);
+           }
+           else {
+               e.AcceptSocket = null;
+           }
+           //信号量-1
+           acceptClients.WaitOne();
+           bool result= server.AcceptAsync(e);
+           //判断异步事件是否挂起  没挂起说明立刻执行完成  直接处理事件 否则会在处理完成后触发Accept_Comleted事件
+           if (!result) {
+               ProcessAccept(e);
+           }
+       }
+
+       public void ProcessAccept(SocketAsyncEventArgs e) {
+           //从连接对象池取出连接对象 供新用户使用
+           UserToken token = pool.pop();
+           token.conn = e.AcceptSocket;
+           //TODO 通知应用层 有客户端连接
+
+           //开启消息到达监听
+           StartReceive(token);
+           //释放当前异步对象
+           StartAccept(e);
+       }
+
+       public void Accept_Comleted(object sender, SocketAsyncEventArgs e) {
+           ProcessAccept(e);
+       }
+
+       public void StartReceive(UserToken token) {
+           //用户连接对象 开启异步数据接收
+           bool result= token.conn.ReceiveAsync(token.receiveSAEA);
+           //异步事件是否挂起
+           if (!result)
+           {
+               ProcessReceive(token.receiveSAEA);
+           }
+       }
+
+       public void IO_Comleted(object sender, SocketAsyncEventArgs e)
+       {
+           if (e.LastOperation == SocketAsyncOperation.Receive)
+           {
+               ProcessReceive(e);
+           }
+           else {
+               ProcessSend(e);
+           }
+       }
+
+       public void ProcessReceive(SocketAsyncEventArgs e) {
+           UserToken token= e.UserToken as UserToken;
+           //判断网络消息接收是否成功
+           if (token.receiveSAEA.BytesTransferred &gt; 0 &amp;&amp; token.receiveSAEA.SocketError == SocketError.Success)
+           {
+               byte[] message = new byte[token.receiveSAEA.BytesTransferred];
+               //将网络消息拷贝到自定义数组
+               Buffer.BlockCopy(token.receiveSAEA.Buffer, 0, message, 0, token.receiveSAEA.BytesTransferred);
+               //处理接收到的消息
+               token.receive(message);
+               StartReceive(token);
+           }
+           else {
+               if (token.receiveSAEA.SocketError != SocketError.Success)
+               {
+                   ClientClose(token, token.receiveSAEA.SocketError.ToString());
+               }
+               else {
+                   ClientClose(token, &quot;客户端主动断开连接&quot;);
+               }
+           }
+       }
+       public void ProcessSend(SocketAsyncEventArgs e) {
+           UserToken token = e.UserToken as UserToken;
+           if (e.SocketError != SocketError.Success)
+           {
+               ClientClose(token, e.SocketError.ToString());
+           }
+           else { 
+            //消息发送成功，回调成功
+               token.writed();
+           }
+       }
+
+       /// &lt;summary&gt;
+       /// 客户端断开连接
+       /// &lt;/summary&gt;
+       /// &lt;param name=&quot;token&quot;&gt; 断开连接的用户对象&lt;/param&gt;
+       /// &lt;param name=&quot;error&quot;&gt;断开连接的错误编码&lt;/param&gt;
+       public void ClientClose(UserToken token,string error) {
+           if (token.conn != null) {
+               lock (token) { 
+                //通知应用层面 客户端断开连接了
+                   token.Close();
+                   //加回一个信号量，供其它用户使用
+                   pool.push(token);
+                   acceptClients.Release();                   
+               }
+           }
+       }
+    }
+}
+</code></pre><h1 id="UserToken-Class"><a href="#UserToken-Class" class="headerlink" title="UserToken Class"></a>UserToken Class</h1><hr>
+<pre><code>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NetFrame
+{
+    /// &lt;summary&gt;
+    /// 用户连接信息对象
+    /// &lt;/summary&gt;
+   public class UserToken
+    {
+       /// &lt;summary&gt;
+       /// 用户连接
+       /// &lt;/summary&gt;
+       public Socket conn;
+       //用户异步接收网络数据对象
+       public SocketAsyncEventArgs receiveSAEA;
+       //用户异步发送网络数据对象
+       public SocketAsyncEventArgs sendSAEA;
+
+       public LengthEncode LE;
+       public LengthDecode LD;
+       public encode encode;
+       public decode decode;
+
+
+       public delegate void SendProcess(SocketAsyncEventArgs e);
+
+       public SendProcess sendProcess;
+
+       List&lt;byte&gt; cache = new List&lt;byte&gt;();
+
+       private bool isReading = false;
+       private bool isWriting = false;
+       Queue&lt;byte[]&gt; writeQueue = new Queue&lt;byte[]&gt;();
+
+       public UserToken() {
+           receiveSAEA = new SocketAsyncEventArgs();
+           sendSAEA = new SocketAsyncEventArgs();
+           receiveSAEA.UserToken = this;
+           sendSAEA.UserToken = this;
+       }
+       //网络消息到达
+       public void receive(byte[] buff) {
+           //将消息写入缓存
+           cache.AddRange(buff);
+           if (!isReading)
+           {
+               isReading = true;
+               onData();
+           }
+       }
+       //缓存中有数据处理
+       void onData() {
+           //解码消息存储对象
+           byte[] buff = null;
+           //当粘包解码器存在的时候 进行粘包处理
+           if (LD != null)
+           {
+               buff = LD(ref cache);
+               //消息未接收全 退出数据处理 等待下次消息到达
+               if (buff == null) { isReading = false; return; }
+           }
+           else {
+               //缓存区中没有数据 直接跳出数据处理 等待下次消息到达
+               if (cache.Count == 0) { isReading = false; return; }
+           }
+           //反序列化方法是否存在
+           if (decode == null) { throw new Exception(&quot;message decode process is null&quot;); }
+           //进行消息反序列化
+           object message = decode(buff);
+           //TODO 通知应用层 有消息到达
+
+           //尾递归 防止在消息处理过程中 有其他消息到达而没有经过处理
+           onData();
+       }
+
+       public void write(byte[] value) {
+           if (conn == null) {
+               //此连接已经断开了
+               return;
+           }
+           writeQueue.Enqueue(value);
+           if (!isWriting) {
+               isWriting = true;
+               onWrite();
+           }
+       }
+
+       public void onWrite() {
+           //判断发送消息队列是否有消息
+           if (writeQueue.Count == 0) { isWriting = false; return; }
+           //取出第一条待发消息
+           byte[] buff = writeQueue.Dequeue();
+           //设置消息发送异步对象的发送数据缓冲区数据
+           sendSAEA.SetBuffer(buff, 0, buff.Length);
+           //开启异步发送
+           bool result = conn.SendAsync(sendSAEA);
+           //是否挂起
+           if (!result) {
+               sendProcess(sendSAEA);
+           }
+       }
+
+       public void writed() {
+           //与onData尾递归同理
+           onWrite();
+       }
+       public void Close() {
+           try
+           {
+               writeQueue.Clear();
+               cache.Clear();
+               isReading = false;
+               isWriting = false;
+               conn.Shutdown(SocketShutdown.Both);
+               conn.Close();
+               conn = null;
+           }
+           catch (Exception e) {
+               Console.WriteLine(e.Message);
+           }
+       }
+    }
+}
+</code></pre><h1 id="UserTokenPool"><a href="#UserTokenPool" class="headerlink" title="UserTokenPool"></a>UserTokenPool</h1><hr>
+<pre><code>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NetFrame
+{
+   public class UserTokenPool
+    {
+       private Stack&lt;UserToken&gt; pool; //后进先去的原则
+
+       public UserTokenPool(int max) {
+           pool = new Stack&lt;UserToken&gt;(max);
+       }
+       /// &lt;summary&gt;
+       /// 取出一个连接对象 --创建连接
+       /// &lt;/summary&gt;
+       public UserToken pop() {
+
+           return pool.Pop();
+       }
+       //插入一个连接对象---释放连接
+       public void push(UserToken token) {
+           if (token != null)
+               pool.Push(token);
+       }
+       public int Size {
+           get { return pool.Count; } 
+       }
+    }
+}
+</code></pre><h1 id="CodingDelegate"><a href="#CodingDelegate" class="headerlink" title="CodingDelegate"></a>CodingDelegate</h1><hr>
+<pre><code>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NetFrame
+{
+    public delegate byte[] LengthEncode(byte[] value);
+    public delegate byte[] LengthDecode(ref List&lt;byte&gt; value);
+
+    public delegate byte[] encode(object value);
+    public delegate object decode(byte[] value);
+}
+</code></pre><h1 id="LengthEncoding"><a href="#LengthEncoding" class="headerlink" title="LengthEncoding"></a>LengthEncoding</h1><hr>
+<pre><code>using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NetFrame.auto
+{
+   public class LengthEncoding
+    {
+       /// &lt;summary&gt;
+       /// 粘包长度编码
+       /// &lt;/summary&gt;
+       /// &lt;param name=&quot;buff&quot;&gt;&lt;/param&gt;
+       /// &lt;returns&gt;&lt;/returns&gt;
+       public static byte[] encode(byte[] buff) {
+           MemoryStream ms = new MemoryStream();//创建内存流对象
+           BinaryWriter sw = new BinaryWriter(ms);//写入二进制对象流
+           //写入消息长度
+           sw.Write(buff.Length);
+           //写入消息体
+           sw.Write(buff);
+           byte[] result = new byte[ms.Length];
+           Buffer.BlockCopy(ms.GetBuffer(), 0, result, 0, (int)ms.Length);
+           sw.Close();
+           ms.Close();
+           return result;
+
+       }
+       /// &lt;summary&gt;
+       /// 粘包长度解码
+       /// &lt;/summary&gt;
+       /// &lt;param name=&quot;cache&quot;&gt;&lt;/param&gt;
+       /// &lt;returns&gt;&lt;/returns&gt;
+       public static byte[] decode(ref List&lt;byte&gt; cache) {
+           if (cache.Count &lt; 4) return null;
+
+           MemoryStream ms = new MemoryStream(cache.ToArray());//创建内存流对象，并将缓存数据写入进去
+           BinaryReader br = new BinaryReader(ms);//二进制读取流
+           int length = br.ReadInt32();//从缓存中读取int型消息体长度
+           //如果消息体长度 大于缓存中数据长度 说明消息没有读取完 等待下次消息到达后再次处理
+           if (length &gt; ms.Length - ms.Position) {
+               return null;
+           }
+           //读取正确长度的数据
+           byte[] result = br.ReadBytes(length);
+           //清空缓存
+           cache.Clear();
+           //将读取后的剩余数据写入缓存
+           cache.AddRange(br.ReadBytes((int)(ms.Length - ms.Position)));
+           br.Close();
+           ms.Close();
+           return result;
+       }
+    }
+}
+</code></pre>
+        
+    
+
+    
+</div>
+
+
+                
+
+                <!-- Post Comments -->
+                
+                    
+    <!-- 使用 DISQUS -->
+<div id="disqus-comment">
+    <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2018/01/29/ServerDevelopment/';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://yoursite.com/2018/01/29/ServerDevelopment/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+</script>
+<script type="text/ls-javascript" id="disqus-thread-script">
+    queue.offer(function() {
+            (function() { // DON'T EDIT BELOW THIS LINE
+                var d = document;
+                var s = d.createElement('script');
+                s.src = '//preston.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', + new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        });
+</script>
+
+</div>
+<style>
+    #disqus-comment{
+        background-color: #eee;
+        padding: 2pc;
+    }
+</style>
+
+                
+            </div>
+
+            <!-- Post Prev & Next Nav -->
+            <nav class="material-nav mdl-color-text--grey-50 mdl-cell mdl-cell--12-col">
+    <!-- Prev Nav -->
+    
+
+    <!-- Section Spacer -->
+    <div class="section-spacer"></div>
+
+    <!-- Next Nav -->
+    
+</nav>
+
+        </div>
+    </div>
+
+
+
+                    
+                        <!-- Overlay For Active Sidebar -->
+<div class="sidebar-overlay"></div>
+
+<!-- Material sidebar -->
+<aside id="sidebar" class="sidebar sidebar-colored sidebar-fixed-left" role="navigation">
+    <div id="sidebar-main">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header header-cover" style="background-image: url(/img/sidebar_header.png);">
+    <!-- Top bar -->
+    <div class="top-bar"></div>
+
+    <!-- Sidebar toggle button -->
+    <button type="button" class="sidebar-toggle mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" style="display: initial;" data-upgraded=",MaterialButton,MaterialRipple">
+        <i class="material-icons">clear_all</i>
+        <span class="mdl-button__ripple-container">
+            <span class="mdl-ripple">
+            </span>
+        </span>
+    </button>
+
+    <!-- Sidebar Avatar -->
+    <div class="sidebar-image">
+        <img src="/img/avatar.png" alt="preston's avatar">
+    </div>
+
+    <!-- Sidebar Email -->
+    <a data-toggle="dropdown" class="sidebar-brand" href="#settings-dropdown">
+        jinmingv@email.com
+        <b class="caret"></b>
+    </a>
+</div>
+
+
+        <!-- Sidebar Navigation  -->
+        <ul class="nav sidebar-nav">
+    <!-- User dropdown  -->
+    <li class="dropdown">
+        <ul id="settings-dropdown" class="dropdown-menu">
+            
+                <li>
+                    <a href="mailto: jinmingv@gamil.com" target="_blank" title="Email Me">
+                        
+                            <i class="material-icons sidebar-material-icons sidebar-indent-left1pc-element">email</i>
+                        
+                        Email Me
+                    </a>
+                </li>
+            
+        </ul>
+    </li>
+
+    <!-- Homepage -->
+    
+        <li id="sidebar-first-li">
+            <a href="/">
+                
+                    <i class="material-icons sidebar-material-icons">home</i>
+                
+                Home
+            </a>
+        </li>
+        
+    
+
+    <!-- Archives  -->
+    
+
+    <!-- Categories  -->
+    
+        <li class="dropdown">
+            <a href="#" class="ripple-effect dropdown-toggle" data-toggle="dropdown">
+                
+                    <i class="material-icons sidebar-material-icons">chrome_reader_mode</i>
+                
+                Categories
+                <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                <a class="sidebar_archives-link" href="/categories/Server/">Server<span class="sidebar_archives-count">1</span></a>
+            </ul>
+        </li>
+        
+    
+
+    <!-- Pages  -->
+    
+
+    <!-- Article Number  -->
+    
+</ul>
+
+
+        <!-- Sidebar Footer -->
+        <!--
+I'm glad you use this theme, the development is no so easy, I hope you can keep the copyright, I will thank you so much.
+If you still want to delete the copyrights, could you still retain the first one? Which namely "Theme Material"
+It will not impact the appearance and can give developers a lot of support :)
+
+很高兴您使用并喜欢该主题，开发不易 十分谢谢与希望您可以保留一下版权声明。
+如果您仍然想删除的话 能否只保留第一项呢？即 "Theme Material"
+它不会影响美观并可以给开发者很大的支持和动力。 :)
+-->
+
+<!-- Sidebar Divider -->
+
+
+<!-- Theme Material -->
+
+
+<!-- Help & Support -->
+<!--
+
+-->
+
+<!-- Feedback -->
+<!--
+
+-->
+
+<!-- About Theme -->
+<!--
+
+-->
+
+    </div>
+
+    <!-- Sidebar Image -->
+    
+
+</aside>
+
+                    
+
+                    
+                        <!-- Footer Top Button -->
+                        <div id="back-to-top" class="toTop-wrap">
+    <a href="#top" class="toTop">
+        <i class="material-icons footer_top-i">expand_less</i>
+    </a>
+</div>
+
+                    
+
+                    <!--Footer-->
+<footer class="mdl-mini-footer" id="bottom">
+    
+        <!-- Paradox Footer Left Section -->
+        <div class="mdl-mini-footer--left-section sns-list">
+    <!-- Twitter -->
+    
+
+    <!-- Facebook -->
+    
+
+    <!-- Google + -->
+    
+
+    <!-- Weibo -->
+    
+
+    <!-- Instagram -->
+    
+
+    <!-- Tumblr -->
+    
+
+    <!-- Github -->
+    
+
+    <!-- LinkedIn -->
+    
+
+    <!-- Zhihu -->
+    
+
+    <!-- Bilibili -->
+    
+
+    <!-- Telegram -->
+    
+    
+    <!-- V2EX -->
+    
+</div>
+
+
+        <!--Copyright-->
+        <div id="copyright">
+            Copyright&nbsp;©&nbsp;2017&nbsp;-<script type="text/javascript">var fd = new Date();document.write("&nbsp;" + fd.getFullYear() + "&nbsp;");</script>Preston
+            
+        </div>
+
+        <!-- Paradox Footer Right Section -->
+
+        <!--
+        I am glad you use this theme, the development is no so easy, I hope you can keep the copyright.
+        It will not impact the appearance and can give developers a lot of support :)
+
+        很高兴您使用该主题，开发不易，希望您可以保留一下版权声明。
+        它不会影响美观并可以给开发者很大的支持。 :)
+        -->
+
+        <div class="mdl-mini-footer--right-section">
+            <div>
+                <div class="footer-develop-div">Powered by <a href="https://hexo.io" target="_blank" class="footer-develop-a">Hexo</a></div>
+                <div class="footer-develop-div">Theme - <a href="https://github.com/viosey/hexo-theme-material" target="_blank" class="footer-develop-a">Material</a></div>
+            </div>
+        </div>
+    
+</footer>
+
+
+                    <!-- Import JS File -->
+
+    <script>lsloader.load("lazyload_js","/js/lazyload.min.js?1BcfzuNXqV+ntF6gq+5X3Q==", true)</script>
+
+
+
+    <script>lsloader.load("js_js","/js/js.min.js?V/53wGualMuiPM3xoetD5Q==", true)</script>
+
+
+
+    <script>lsloader.load("np_js","/js/nprogress.js?pl3Qhb9lvqR1FlyLUna1Yw==", true)</script>
+
+
+<script type="text/ls-javascript" id="NProgress-script">
+    NProgress.configure({
+        showSpinner: true
+    });
+    NProgress.start();
+    $('#nprogress .bar').css({
+        'background': '#29d'
+    });
+    $('#nprogress .peg').css({
+        'box-shadow': '0 0 10px #29d, 0 0 15px #29d'
+    });
+    $('#nprogress .spinner-icon').css({
+        'border-top-color': '#29d',
+        'border-left-color': '#29d'
+    });
+    setTimeout(function() {
+        NProgress.done();
+        $('.fade').removeClass('out');
+    }, 800);
+</script>
+
+
+
+    
+        <script>lsloader.load("sm_js","/js/smoothscroll.js?lOy/ACj5suSNi7ZVFVbpFQ==", true)</script>
+    
+
+
+
+
+
+
+
+   <!-- 使用 DISQUS js 代码 -->
+<script id="dsq-count-scr" src="//preston.disqus.com/count.js" async></script>
+
+
+
+
+
+<!-- UC Browser Compatible -->
+<script>
+	var agent = navigator.userAgent.toLowerCase();
+	if(agent.indexOf('ucbrowser')>0) {
+		document.write('<link rel="stylesheet" href="/css/uc.css">');
+	   alert('由于 UC 浏览器使用极旧的内核，而本网站使用了一些新的特性。\n为了您能更好的浏览，推荐使用 Chrome 或 Firefox 浏览器。');
+	}
+</script>
+
+<!-- Import prettify js  -->
+
+
+
+<!-- Window Load -->
+<!-- add class for prettify -->
+<script type="text/ls-javascript" id="window-load">
+    $(window).on('load', function() {
+        // Post_Toc parent position fixed
+        $('.post-toc-wrap').parent('.mdl-menu__container').css('position', 'fixed');
+    });
+
+    
+    
+</script>
+
+<!-- MathJax Load-->
+
+
+<!-- Bing Background -->
+
+
+<script type="text/ls-javascript" id="lazy-load">
+    // Offer LazyLoad
+    queue.offer(function(){
+        $('.lazy').lazyload({
+            effect : 'show'
+        });
+    });
+
+    // Start Queue
+    $(document).ready(function(){
+        setInterval(function(){
+            queue.execNext();
+        },200);
+    });
+</script>
+
+<!-- Custom Footer -->
+
+
+
+<script>
+    (function(){
+        var scriptList = document.querySelectorAll('script[type="text/ls-javascript"]')
+
+        for (var i = 0; i < scriptList.length; ++i) {
+            var item = scriptList[i];
+            lsloader.runInlineScript(item.id,item.id);
+        }
+    })()
+console.log('\n %c © Material Theme | Version: 1.5.2 | https://github.com/viosey/hexo-theme-material %c \n', 'color:#455a64;background:#e0e0e0;padding:5px 0;border-top-left-radius:5px;border-bottom-left-radius:5px;', 'color:#455a64;background:#e0e0e0;padding:5px 0;border-top-right-radius:5px;border-bottom-right-radius:5px;');
+</script>
+
+                </main>
+            </div>
+        </body>
+    
+</html>

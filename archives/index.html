@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="display: none;" >
+<html style="display: none;" lang="en">
     <head>
     <meta charset="utf-8">
     <!--
@@ -43,9 +43,9 @@
     
     <title>
         
-            أرشيف | 
+            Archives | 
         
-        Hexo
+        Preston
     </title>
 
     <!-- Favicons -->
@@ -162,12 +162,7 @@
 
     <style>
       body{
-        background-color: #F5F5F5;
-      }
-
-      /* blog_info bottom background */
-      #scheme-Paradox .material-layout .something-else .mdl-card__supporting-text{
-        background-color: #fff;
+        background-image: url(/img/bg.png);
       }
     </style>
 
@@ -214,17 +209,17 @@
 
     <!-- WebAPP Icons -->
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Hexo">
+    <meta name="application-name" content="Preston">
     <meta name="msapplication-starturl" content="http://yoursite.com/archives/">
     <meta name="msapplication-navbutton-color" content="#0097A7">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Hexo">
+    <meta name="apple-mobile-web-app-title" content="Preston">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="/img/favicon.png">
 
     <!-- Site Verification -->
-    
-    
+    <meta name="google-site-verification" content="6fINUhXBoM6J3SMyMUftivP9xsMBCQ0YREdTY9cOCHw" />
+    <meta name="baidu-site-verification" content="sfcMzbdPmT" />
 
     <!-- RSS -->
     
@@ -232,7 +227,7 @@
     <!-- The Open Graph protocol -->
     <meta property="og:url" content="http://yoursite.com/archives/">
     <meta property="og:type" content="blog">
-    <meta property="og:title" content="أرشيف | Hexo">
+    <meta property="og:title" content="Archives | Preston">
     <meta property="og:image" content="/img/favicon.png">
     <meta property="og:description" content="">
     
@@ -291,6 +286,8 @@
 
     <!-- Pin on top -->
     
+        
+    
 
     <!-- Normal Post -->
     
@@ -300,24 +297,22 @@
                 <div class="post_entry-module mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col fade out">
     <!-- Post Thumbnail -->
     
-        
-            <!-- Random Thumbnail -->
-            <div class="post_thumbnail-random mdl-card__media mdl-color-text--grey-50">
-        
+        <!-- Custom Thumbnail -->
+        <div class="post_thumbnail-custom mdl-card__media mdl-color-text--grey-50 lazy" data-original="/img/random/material-20.png">
     
 
         <!-- Post Title -->
-        <p class="article-headline-p"><a href="/2018/01/18/hello-world/">Hello World</a></p>
+        <p class="article-headline-p"><a href="/2018/01/29/ServerDevelopment/">网络通信的底层开发-服务端</a></p>
     </div>
 
     <!-- Post Excerpt -->
     <div class="mdl-color-text--grey-600 mdl-card__supporting-text post_entry-content">
         
-            Welcome to Hexo
+            
         
         &nbsp;&nbsp;&nbsp;
         <span>
-            <a href="/2018/01/18/hello-world/" target="_self">واصل القراءة</a>
+            <a href="/2018/01/29/ServerDevelopment/" target="_self">Read more</a>
         </span>
     </div>
     <!-- Post_entry Info-->
@@ -325,15 +320,20 @@
         <div id="post_entry-left-info" class="mdl-card__supporting-text meta mdl-color-text--grey-600 ">
             <!-- Author Avatar -->
             <div id="author-avatar">
-                <img src="/img/avatar.png" width="44px" height="44px" alt="John Doe's avatar">
+                <img src="/img/avatar.png" width="44px" height="44px" alt="preston's avatar">
             </div>
             <div>
-                <strong>John Doe</strong>
-                <span>Jan 18, 2018</span>
+                <strong>preston</strong>
+                <span>Jan 29, 2018</span>
             </div>
         </div>
         <div id="post_entry-right-info">
           
+              <!-- Category -->
+              <span class="post_entry-category">
+                  <a class="post_category-link" href="/categories/Server/">Server</a>
+              </span>
+            
 
             
 
@@ -359,7 +359,7 @@
 
     var locatePost = $('.locate-thumbnail-symbol').next();
     for(var i = 0; i < 10; i++) {
-        randomNum = Math.floor(Math.random() * 19 + 1);
+        randomNum = Math.floor(Math.random() * 20 + 1);
 
         locatePost.children('.post_thumbnail-random').attr('id', 'random_thumbnail-'+randomNum);
         locatePost.children('.post_thumbnail-random').attr('data-original', '/img/random/material-' + randomNum + '.png');
@@ -396,12 +396,12 @@
 
     <!-- Sidebar Avatar -->
     <div class="sidebar-image">
-        <img src="/img/avatar.png" alt="John Doe's avatar">
+        <img src="/img/avatar.png" alt="preston's avatar">
     </div>
 
     <!-- Sidebar Email -->
     <a data-toggle="dropdown" class="sidebar-brand" href="#settings-dropdown">
-        youremail@email.com
+        jinmingv@email.com
         <b class="caret"></b>
     </a>
 </div>
@@ -414,7 +414,7 @@
         <ul id="settings-dropdown" class="dropdown-menu">
             
                 <li>
-                    <a href="#" target="_blank" title="Email Me">
+                    <a href="mailto: jinmingv@gamil.com" target="_blank" title="Email Me">
                         
                             <i class="material-icons sidebar-material-icons sidebar-indent-left1pc-element">email</i>
                         
@@ -432,7 +432,7 @@
                 
                     <i class="material-icons sidebar-material-icons">home</i>
                 
-                الرئيسية
+                Home
             </a>
         </li>
         
@@ -440,23 +440,23 @@
 
     <!-- Archives  -->
     
+
+    <!-- Categories  -->
+    
         <li class="dropdown">
             <a href="#" class="ripple-effect dropdown-toggle" data-toggle="dropdown">
                 
-                    <i class="material-icons sidebar-material-icons">inbox</i>
+                    <i class="material-icons sidebar-material-icons">chrome_reader_mode</i>
                 
-                    أرشيف
+                Categories
                 <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-            <li>
-                <a class="sidebar_archives-link" href="/archives/2018/01/">January 2018<span class="sidebar_archives-count">1</span></a>
+                <li>
+                <a class="sidebar_archives-link" href="/categories/Server/">Server<span class="sidebar_archives-count">1</span></a>
             </ul>
         </li>
         
-    
-
-    <!-- Categories  -->
     
 
     <!-- Pages  -->
@@ -480,17 +480,8 @@ It will not impact the appearance and can give developers a lot of support :)
 
 <!-- Sidebar Divider -->
 
-    <div class="sidebar-divider"></div>
-
 
 <!-- Theme Material -->
-
-    <a href="https://github.com/viosey/hexo-theme-material"  class="sidebar-footer-text-a" target="_blank">
-        <div class="sidebar-text mdl-button mdl-js-button mdl-js-ripple-effect sidebar-footer-text-div" data-upgraded=",MaterialButton,MaterialRipple">
-            سمة - Material
-            <span class="sidebar-badge badge-circle">i</span>
-        </div>
-    </a>
 
 
 <!-- Help & Support -->
@@ -534,29 +525,11 @@ It will not impact the appearance and can give developers a lot of support :)
         <div class="mdl-mini-footer--left-section sns-list">
     <!-- Twitter -->
     
-        <a href="https://twitter.com/twitter" target="_blank">
-            <button class="mdl-mini-footer--social-btn social-btn footer-sns-twitter">
-                <span class="visuallyhidden">Twitter</span>
-            </button><!--
-     --></a>
-    
 
     <!-- Facebook -->
     
-        <a href="https://www.facebook.com/facebook" target="_blank">
-            <button class="mdl-mini-footer--social-btn social-btn footer-sns-facebook">
-                <span class="visuallyhidden">Facebook</span>
-            </button><!--
-     --></a>
-    
 
     <!-- Google + -->
-    
-        <a href="https://www.google.com/" target="_blank">
-            <button class="mdl-mini-footer--social-btn social-btn footer-sns-gplus">
-                <span class="visuallyhidden">Google Plus</span>
-            </button><!--
-     --></a>
     
 
     <!-- Weibo -->
@@ -590,7 +563,7 @@ It will not impact the appearance and can give developers a lot of support :)
 
         <!--Copyright-->
         <div id="copyright">
-            Copyright&nbsp;©<script type="text/javascript">var fd = new Date();document.write("&nbsp;" + fd.getFullYear() + "&nbsp;");</script>Hexo
+            Copyright&nbsp;©&nbsp;2017&nbsp;-<script type="text/javascript">var fd = new Date();document.write("&nbsp;" + fd.getFullYear() + "&nbsp;");</script>Preston
             
         </div>
 
@@ -650,11 +623,18 @@ It will not impact the appearance and can give developers a lot of support :)
 
 
 
+    
+        <script>lsloader.load("sm_js","/js/smoothscroll.js?lOy/ACj5suSNi7ZVFVbpFQ==", true)</script>
+    
 
 
 
 
 
+
+
+   <!-- 使用 DISQUS js 代码 -->
+<script id="dsq-count-scr" src="//preston.disqus.com/count.js" async></script>
 
 
 
