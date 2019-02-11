@@ -333,144 +333,6 @@ Path is: 1 -&gt; 3 -&gt; 2
     </entry>
     
     <entry>
-      <title><![CDATA[Longest Increasing Subsequence]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Longest%20Increasing%20Subsequence/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Increasing Subsequence</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a sequence of integers, find the longest increasing subsequence (LIS).</p>
-<p>You code should return the length of the LIS.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>For [5, 4, 1, 2, 3], the LIS is [1, 2, 3], return 3</p>
-<p>For [4, 2, 4, 5, 3, 7], the LIS is [2, 4, 5, 7], return 4</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/SSC4HPk.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param nums: An integer array
-     * @return: The length of LIS (longest increasing subsequence)
-     */
-    public int longestIncreasingSubsequence(int[] nums) 
-    {
-        int []f = new int[nums.length];
-        int max = 0;
-        for (int i = 0; i &lt; nums.length; i++)    //for 所有的点
-        {
-            f[i] = 1;  //初始化  自己算作是1
-            for (int j = 0; j &lt; i; j++)      //for每个点 前面的所有j 
-            {
-                if (nums[j] &lt; nums[i])  //如果当前j所在的阶梯 比 i小 才有戏
-                {
-                    //返回所有lis的最大值
-                    f[i] = f[i] &gt; f[j] + 1 ? f[i] : f[j] + 1;    //有戏了  最长子序列才 +1(然后打擂台算法：找一个当前最大的)
-                }
-            }
-            if (f[i] &gt; max) 
-            {
-                max = f[i];
-            }
-        }
-        return max;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.lintcode.com/problem/longest-increasing-subsequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-increasing-subsequence/description</a></p>
-<p>JiuZhang. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.jiuzhang.com/solution/longest-increasing-subsequence/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/longest-increasing-subsequence/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Dynamic Programming </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Edit Distance]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Edit%20Distance/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Edit Distance</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given two words word1 and word2, find the minimum number of steps required to convert word1 to word2. (each operation is counted as 1 step.)</p>
-<p>You have the following 3 operations permitted on a word:</p>
-<p>Insert a character</p>
-<p>Delete a character</p>
-<p>Replace a character</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given word1 = “mart” and word2 = “karma”, return 3.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/0CU4yaK.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param word1: A string
-     * @param word2: A string
-     * @return: The minimum number of steps.
-     */
-    public int minDistance(String word1, String word2) 
-    {
-        int n = word1.length();
-        int m = word2.length();
-
-        //state: f[i][j]代表word1的前i个字符,通过最少多少次编辑,能够变成word2的前j个字符
-        int[][] dp = new int[n+1][m+1];         //开个动态的数组
-
-        //initialize
-        for(int i=0; i&lt; m+1; i++)
-        {
-            dp[0][i] = i;     //i  次Insert
-        }
-        for(int i=0; i&lt;n+1; i++)
-        {
-            dp[i][0] = i;      //i  次Delete
-        }
-
-        //function
-        for(int i = 1; i&lt;n+1; i++)   
-        {
-            for(int j=1; j&lt;m+1; j++)
-            {
-                if(word1.charAt(i-1) == word2.charAt(j-1))  //等于的情况
-                {
-                    dp[i][j] = dp[i-1][j-1];
-                }
-                else
-                {
-                    dp[i][j] = 1 + Math.min(dp[i-1][j-1], Math.min(dp[i-1][j], dp[i][j-1]));
-                }
-            }
-        }
-
-        //answer
-        return dp[n][m];
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Edit Distance. Retrieved from: <a href="https://www.lintcode.com/problem/edit-distance/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/edit-distance/description</a></p>
-<p>JiuZhang. (2018). Edit Distance. Retrieved from: <a href="https://www.jiuzhang.com/solution/edit-distance/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/edit-distance/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Dynamic Programming </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Interleaving String]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Interleaving%20String/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Interleaving String</strong></font><br></p>
@@ -566,63 +428,132 @@ false
     </entry>
     
     <entry>
-      <title><![CDATA[Climbing Stairs]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Climbing%20Stairs/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Climbing Stairs</strong></font><br></p>
+      <title><![CDATA[Edit Distance]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Edit%20Distance/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Edit Distance</strong></font><br></p>
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
-<p>You are climbing a stair case. It takes n steps to reach to the top.</p>
-<p>Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?</p>
+<p>Given two words word1 and word2, find the minimum number of steps required to convert word1 to word2. (each operation is counted as 1 step.)</p>
+<p>You have the following 3 operations permitted on a word:</p>
+<p>Insert a character</p>
+<p>Delete a character</p>
+<p>Replace a character</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
-<p>Example 1:</p>
-<pre><code>Input:  n = 3
-Output: 3
+<p>Given word1 = “mart” and word2 = “karma”, return 3.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-Explanation:
-1) 1, 1, 1
-2) 1, 2
-3) 2, 1
-total 3.
-</code></pre><p>Example 2:</p>
-<pre><code>Input:  n = 1
-Output: 1
-
-Explanation:  
-only 1 way.
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/CundfRS.png" alt=""></p>
+<p><img src="https://i.imgur.com/0CU4yaK.png" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
     /**
-     * @param n: An integer
-     * @return: An integer
+     * @param word1: A string
+     * @param word2: A string
+     * @return: The minimum number of steps.
      */
-    public int climbStairs(int n) 
+    public int minDistance(String word1, String word2) 
     {
-        //Check the Corner Case 
-        if (n &lt;= 1) 
+        int n = word1.length();
+        int m = word2.length();
+
+        //state: f[i][j]代表word1的前i个字符,通过最少多少次编辑,能够变成word2的前j个字符
+        int[][] dp = new int[n+1][m+1];         //开个动态的数组
+
+        //initialize
+        for(int i=0; i&lt; m+1; i++)
         {
-            return n;
+            dp[0][i] = i;     //i  次Insert
+        }
+        for(int i=0; i&lt;n+1; i++)
+        {
+            dp[i][0] = i;      //i  次Delete
         }
 
-        int last = 1, lastlast = 1;
-        int now = 0;
-        for (int i = 2; i &lt;= n; i++) //每一个now 都是从两种情况进来
+        //function
+        for(int i = 1; i&lt;n+1; i++)   
         {
-            now = last + lastlast;
-            lastlast = last;
-            last = now;
+            for(int j=1; j&lt;m+1; j++)
+            {
+                if(word1.charAt(i-1) == word2.charAt(j-1))  //等于的情况
+                {
+                    dp[i][j] = dp[i-1][j-1];
+                }
+                else
+                {
+                    dp[i][j] = 1 + Math.min(dp[i-1][j-1], Math.min(dp[i-1][j], dp[i][j-1]));
+                }
+            }
         }
-        return now;
+
+        //answer
+        return dp[n][m];
     }
 }
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
-<p>LintCode. (2018). Climbing Stairs. Retrieved from: <a href="https://www.lintcode.com/problem/climbing-stairs/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/climbing-stairs/description</a></p>
-<p>JiuZhang. (2018). Climbing Stairs. Retrieved from: <a href="https://www.jiuzhang.com/solution/climbing-stairs/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/climbing-stairs/</a></p>
+<p>LintCode. (2018). Edit Distance. Retrieved from: <a href="https://www.lintcode.com/problem/edit-distance/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/edit-distance/description</a></p>
+<p>JiuZhang. (2018). Edit Distance. Retrieved from: <a href="https://www.jiuzhang.com/solution/edit-distance/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/edit-distance/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Longest Increasing Subsequence]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Longest%20Increasing%20Subsequence/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Increasing Subsequence</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a sequence of integers, find the longest increasing subsequence (LIS).</p>
+<p>You code should return the length of the LIS.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>For [5, 4, 1, 2, 3], the LIS is [1, 2, 3], return 3</p>
+<p>For [4, 2, 4, 5, 3, 7], the LIS is [2, 4, 5, 7], return 4</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="https://i.imgur.com/SSC4HPk.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: An integer array
+     * @return: The length of LIS (longest increasing subsequence)
+     */
+    public int longestIncreasingSubsequence(int[] nums) 
+    {
+        int []f = new int[nums.length];
+        int max = 0;
+        for (int i = 0; i &lt; nums.length; i++)    //for 所有的点
+        {
+            f[i] = 1;  //初始化  自己算作是1
+            for (int j = 0; j &lt; i; j++)      //for每个点 前面的所有j 
+            {
+                if (nums[j] &lt; nums[i])  //如果当前j所在的阶梯 比 i小 才有戏
+                {
+                    //返回所有lis的最大值
+                    f[i] = f[i] &gt; f[j] + 1 ? f[i] : f[j] + 1;    //有戏了  最长子序列才 +1(然后打擂台算法：找一个当前最大的)
+                }
+            }
+            if (f[i] &gt; max) 
+            {
+                max = f[i];
+            }
+        }
+        return max;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.lintcode.com/problem/longest-increasing-subsequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-increasing-subsequence/description</a></p>
+<p>JiuZhang. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.jiuzhang.com/solution/longest-increasing-subsequence/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/longest-increasing-subsequence/</a></p>
 ]]></content>
       
         <categories>
@@ -686,6 +617,75 @@ only 1 way.
 
 <p>LintCode. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.lintcode.com/problem/distinct-subsequences/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/distinct-subsequences/description</a></p>
 <p>JiuZhang. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.jiuzhang.com/solution/distinct-subsequences/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/distinct-subsequences/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Climbing Stairs]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Climbing%20Stairs/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Climbing Stairs</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>You are climbing a stair case. It takes n steps to reach to the top.</p>
+<p>Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input:  n = 3
+Output: 3
+
+Explanation:
+1) 1, 1, 1
+2) 1, 2
+3) 2, 1
+total 3.
+</code></pre><p>Example 2:</p>
+<pre><code>Input:  n = 1
+Output: 1
+
+Explanation:  
+only 1 way.
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="https://i.imgur.com/CundfRS.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param n: An integer
+     * @return: An integer
+     */
+    public int climbStairs(int n) 
+    {
+        //Check the Corner Case 
+        if (n &lt;= 1) 
+        {
+            return n;
+        }
+
+        int last = 1, lastlast = 1;
+        int now = 0;
+        for (int i = 2; i &lt;= n; i++) //每一个now 都是从两种情况进来
+        {
+            now = last + lastlast;
+            lastlast = last;
+            last = now;
+        }
+        return now;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Climbing Stairs. Retrieved from: <a href="https://www.lintcode.com/problem/climbing-stairs/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/climbing-stairs/description</a></p>
+<p>JiuZhang. (2018). Climbing Stairs. Retrieved from: <a href="https://www.jiuzhang.com/solution/climbing-stairs/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/climbing-stairs/</a></p>
 ]]></content>
       
         <categories>
@@ -1450,6 +1450,100 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Longest Substring with At Most K Distinct Characters]]></title>
+      <url>/2019/02/04/Two%20Pointer/Longest%20Substring%20with%20At%20Most%20K%20Distinct%20Characters/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Substring with At Most K Distinct Characters</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string S, find the length of the longest substring T that contains at most k distinct characters.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input: S = &quot;eceba&quot; and k = 3
+Output: 4
+Explanation: T = &quot;eceb&quot;
+</code></pre><p>Example 2:</p>
+<pre><code>Input: S = &quot;WORLD&quot; and k = 4
+Output: 4
+Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>O(n) time</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="https://i.imgur.com/pTLhdSm.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param s: A string
+     * @param k: An integer
+     * @return: An integer
+     */
+    public int lengthOfLongestSubstringKDistinct(String s, int k) 
+    {
+        //Check the Corner Case 
+        if (s == null || s.length() == 0 || k == 0) 
+        {
+            return 0;
+        }
+        HashMap&lt;Character, Integer&gt; map = new HashMap&lt;Character, Integer&gt;();
+        int strLength = s.length();
+        int i = 0;
+        int j = 0;
+        int ans = Integer.MIN_VALUE;
+
+        for (i = 0; i &lt; strLength; i++)   //固定左指针
+        {
+            while (j &lt; strLength)   //每次跟新右指针
+            {
+                char ch_j = s.charAt(j);
+                if (!map.containsKey(ch_j))  //这个元素没有就添加
+                {
+                    if (map.size() == k)  //所包含的元素个数等于目标K
+                    {
+                        break;
+                    }
+                    map.put(ch_j, 1);
+                } 
+                else 
+                {
+                    map.put(ch_j, map.get(ch_j) + 1);
+                }
+                j++;
+            }
+            ans = Math.max(ans, j - i);  //每次左右指针移动 都更新区间范围
+            char ch_i = s.charAt(i);
+            if (map.containsKey(ch_i))  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+            {
+                if (map.get(ch_i) - 1 == 0) 
+                {
+                    map.remove(ch_i);
+                } 
+                else 
+                {
+                    map.put(ch_i, map.get(ch_i) - 1);
+                }
+            }
+        }
+        return ans;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Longest Substring with At Most K Distinct Characters. Retrieved from: <a href="https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Minimum Window Substring]]></title>
       <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
@@ -1622,100 +1716,6 @@ Output:
 
 <p>LintCode. (2018). Valid Palindrome. Retrieved from: <a href="https://www.lintcode.com/problem/valid-palindrome/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/valid-palindrome/description</a></p>
 <p>JiuZhang. (2018). Valid Palindrome. Retrieved from: <a href="https://www.jiuzhang.com/solution/valid-palindrome/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/valid-palindrome/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Two Pointer </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Longest Substring with At Most K Distinct Characters]]></title>
-      <url>/2019/02/04/Two%20Pointer/Longest%20Substring%20with%20At%20Most%20K%20Distinct%20Characters/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Substring with At Most K Distinct Characters</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a string S, find the length of the longest substring T that contains at most k distinct characters.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Example 1:</p>
-<pre><code>Input: S = &quot;eceba&quot; and k = 3
-Output: 4
-Explanation: T = &quot;eceb&quot;
-</code></pre><p>Example 2:</p>
-<pre><code>Input: S = &quot;WORLD&quot; and k = 4
-Output: 4
-Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>O(n) time</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/pTLhdSm.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param s: A string
-     * @param k: An integer
-     * @return: An integer
-     */
-    public int lengthOfLongestSubstringKDistinct(String s, int k) 
-    {
-        //Check the Corner Case 
-        if (s == null || s.length() == 0 || k == 0) 
-        {
-            return 0;
-        }
-        HashMap&lt;Character, Integer&gt; map = new HashMap&lt;Character, Integer&gt;();
-        int strLength = s.length();
-        int i = 0;
-        int j = 0;
-        int ans = Integer.MIN_VALUE;
-
-        for (i = 0; i &lt; strLength; i++)   //固定左指针
-        {
-            while (j &lt; strLength)   //每次跟新右指针
-            {
-                char ch_j = s.charAt(j);
-                if (!map.containsKey(ch_j))  //这个元素没有就添加
-                {
-                    if (map.size() == k)  //所包含的元素个数等于目标K
-                    {
-                        break;
-                    }
-                    map.put(ch_j, 1);
-                } 
-                else 
-                {
-                    map.put(ch_j, map.get(ch_j) + 1);
-                }
-                j++;
-            }
-            ans = Math.max(ans, j - i);  //每次左右指针移动 都更新区间范围
-            char ch_i = s.charAt(i);
-            if (map.containsKey(ch_i))  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
-            {
-                if (map.get(ch_i) - 1 == 0) 
-                {
-                    map.remove(ch_i);
-                } 
-                else 
-                {
-                    map.put(ch_i, map.get(ch_i) - 1);
-                }
-            }
-        }
-        return ans;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Longest Substring with At Most K Distinct Characters. Retrieved from: <a href="https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description</a></p>
 ]]></content>
       
         <categories>
@@ -3107,61 +3107,6 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
     </entry>
     
     <entry>
-      <title><![CDATA[maximum number in mountain sequence]]></title>
-      <url>/2019/02/02/Binary%20Search/maximum%20number%20in%20mountain%20sequence/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：maximum number in mountain sequence</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p><img src="https://i.imgur.com/7JDxZKK.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /*
-     * @param nums: a mountain sequence which increase firstly and then decrease
-     * @return: then mountain top
-     */
-    public int mountainSequence(int[] nums) 
-    {
-        // check the corner case
-        if (nums == null || nums.length == 0)
-        {
-            throw new IllegalArgumentException();
-        }
-
-        int start = 0;
-        int end = nums.length - 1;
-        int mid; 
-
-        while (start + 1 &lt; end)
-        {
-            mid = start + (end - start) / 2 
-            if (nums[mid + 1] - nums[mid] &gt; 0)
-            {
-                start = mid;
-            } 
-            else 
-            {
-                end = mid;
-            }
-        }
-        return Math.max (nums[start], nums[end]);            
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). maximum number in mountain sequence. Retrieved from: <a href="https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Binary Search </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[First Bad Version]]></title>
       <url>/2019/02/02/Binary%20Search/First%20Bad%20Version/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：First Bad Version</strong></font><br></p>
@@ -3221,6 +3166,61 @@ public class Solution {
 
 <p>LintCode. (2018). First Bad Version. Retrieved from: <a href="https://www.lintcode.com/problem/first-bad-version/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/first-bad-version/description</a></p>
 <p>JiuZhang. (2018). First Bad Version. Retrieved from: <a href="https://www.jiuzhang.com/solution/first-bad-version/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/first-bad-version/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[maximum number in mountain sequence]]></title>
+      <url>/2019/02/02/Binary%20Search/maximum%20number%20in%20mountain%20sequence/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：maximum number in mountain sequence</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p><img src="https://i.imgur.com/7JDxZKK.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param nums: a mountain sequence which increase firstly and then decrease
+     * @return: then mountain top
+     */
+    public int mountainSequence(int[] nums) 
+    {
+        // check the corner case
+        if (nums == null || nums.length == 0)
+        {
+            throw new IllegalArgumentException();
+        }
+
+        int start = 0;
+        int end = nums.length - 1;
+        int mid; 
+
+        while (start + 1 &lt; end)
+        {
+            mid = start + (end - start) / 2 
+            if (nums[mid + 1] - nums[mid] &gt; 0)
+            {
+                start = mid;
+            } 
+            else 
+            {
+                end = mid;
+            }
+        }
+        return Math.max (nums[start], nums[end]);            
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). maximum number in mountain sequence. Retrieved from: <a href="https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description</a></p>
 ]]></content>
       
         <categories>
@@ -4858,6 +4858,99 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Binary Tree Inorder Traversal]]></title>
+      <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Inorder%20Traversal/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Inorder Traversal</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a binary tree, return the inorder traversal of its nodes’ values.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given binary tree {1,#,2,3},</p>
+<pre><code>1
+ \
+  2
+ /
+3
+</code></pre><p>return [1,3,2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you do it without recursion?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="https://i.imgur.com/EqmWe9R.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
+
+<pre><code>    /**
+ * Definition of TreeNode:
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left, right;
+ *     public TreeNode(int val) {
+ *         this.val = val;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ */
+
+public class Solution {
+    /**
+     * @param root: The root of binary tree.
+     * @return: Inorder in ArrayList which contains node values.
+     */
+    public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) 
+    {
+        Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
+        ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+
+        while (root != null) 
+        {
+            stack.push(root);
+            root = root.left;
+        }
+
+        while (!stack.isEmpty()) 
+        {
+            TreeNode node = stack.peek();
+            result.add(node.val);
+
+            if (node.right == null) 
+            {
+                node = stack.pop();
+                while (!stack.isEmpty() &amp;&amp; stack.peek().right == node) 
+                {
+                    node = stack.pop();
+                }
+            } 
+            else 
+            {
+                node = node.right;
+                while (node != null) 
+                {
+                    stack.push(node);
+                    node = node.left;
+                }
+            }
+        }
+        return result;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-inorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-inorder-traversal/description</a></p>
+<p>JiuZhang. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Tree </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Binary Tree Preorder Traversal]]></title>
       <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Preorder%20Traversal/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Preorder Traversal</strong></font><br></p>
@@ -4981,99 +5074,6 @@ public class Solution {
 
 <p>LintCode. (2018). Binary Tree Preorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-preorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-preorder-traversal/description</a></p>
 <p>JiuZhang. (2018). Binary Tree Preorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-preorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-preorder-traversal/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Binary Tree </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Binary Tree Inorder Traversal]]></title>
-      <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Inorder%20Traversal/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Inorder Traversal</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a binary tree, return the inorder traversal of its nodes’ values.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given binary tree {1,#,2,3},</p>
-<pre><code>1
- \
-  2
- /
-3
-</code></pre><p>return [1,3,2].</p>
-<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>Can you do it without recursion?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/EqmWe9R.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
-
-<pre><code>    /**
- * Definition of TreeNode:
- * public class TreeNode {
- *     public int val;
- *     public TreeNode left, right;
- *     public TreeNode(int val) {
- *         this.val = val;
- *         this.left = this.right = null;
- *     }
- * }
- */
-
-public class Solution {
-    /**
-     * @param root: The root of binary tree.
-     * @return: Inorder in ArrayList which contains node values.
-     */
-    public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) 
-    {
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
-        ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
-
-        while (root != null) 
-        {
-            stack.push(root);
-            root = root.left;
-        }
-
-        while (!stack.isEmpty()) 
-        {
-            TreeNode node = stack.peek();
-            result.add(node.val);
-
-            if (node.right == null) 
-            {
-                node = stack.pop();
-                while (!stack.isEmpty() &amp;&amp; stack.peek().right == node) 
-                {
-                    node = stack.pop();
-                }
-            } 
-            else 
-            {
-                node = node.right;
-                while (node != null) 
-                {
-                    stack.push(node);
-                    node = node.left;
-                }
-            }
-        }
-        return result;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-inorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-inorder-traversal/description</a></p>
-<p>JiuZhang. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/</a></p>
 ]]></content>
       
         <categories>
