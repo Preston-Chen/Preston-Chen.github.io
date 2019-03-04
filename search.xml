@@ -2697,99 +2697,6 @@ public class Solution {
     </entry>
     
     <entry>
-      <title><![CDATA[Binary Tree Inorder Traversal]]></title>
-      <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Inorder%20Traversal/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Inorder Traversal</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a binary tree, return the inorder traversal of its nodes’ values.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given binary tree {1,#,2,3},</p>
-<pre><code>1
- \
-  2
- /
-3
-</code></pre><p>return [1,3,2].</p>
-<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>Can you do it without recursion?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="https://i.imgur.com/EqmWe9R.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
-
-<pre><code>    /**
- * Definition of TreeNode:
- * public class TreeNode {
- *     public int val;
- *     public TreeNode left, right;
- *     public TreeNode(int val) {
- *         this.val = val;
- *         this.left = this.right = null;
- *     }
- * }
- */
-
-public class Solution {
-    /**
-     * @param root: The root of binary tree.
-     * @return: Inorder in ArrayList which contains node values.
-     */
-    public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) 
-    {
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
-        ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
-
-        while (root != null) 
-        {
-            stack.push(root);
-            root = root.left;
-        }
-
-        while (!stack.isEmpty()) 
-        {
-            TreeNode node = stack.peek();
-            result.add(node.val);
-
-            if (node.right == null) 
-            {
-                node = stack.pop();
-                while (!stack.isEmpty() &amp;&amp; stack.peek().right == node) 
-                {
-                    node = stack.pop();
-                }
-            } 
-            else 
-            {
-                node = node.right;
-                while (node != null) 
-                {
-                    stack.push(node);
-                    node = node.left;
-                }
-            }
-        }
-        return result;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-inorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-inorder-traversal/description</a></p>
-<p>JiuZhang. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Binary Tree </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Binary Tree Preorder Traversal]]></title>
       <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Preorder%20Traversal/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Preorder Traversal</strong></font><br></p>
@@ -2913,6 +2820,99 @@ public class Solution {
 
 <p>LintCode. (2018). Binary Tree Preorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-preorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-preorder-traversal/description</a></p>
 <p>JiuZhang. (2018). Binary Tree Preorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-preorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-preorder-traversal/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Tree </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Binary Tree Inorder Traversal]]></title>
+      <url>/2019/01/31/Binary%20Tree/Binary%20Tree%20Inorder%20Traversal/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Inorder Traversal</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a binary tree, return the inorder traversal of its nodes’ values.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given binary tree {1,#,2,3},</p>
+<pre><code>1
+ \
+  2
+ /
+3
+</code></pre><p>return [1,3,2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you do it without recursion?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="https://i.imgur.com/EqmWe9R.png" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
+
+<pre><code>    /**
+ * Definition of TreeNode:
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left, right;
+ *     public TreeNode(int val) {
+ *         this.val = val;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ */
+
+public class Solution {
+    /**
+     * @param root: The root of binary tree.
+     * @return: Inorder in ArrayList which contains node values.
+     */
+    public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) 
+    {
+        Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
+        ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+
+        while (root != null) 
+        {
+            stack.push(root);
+            root = root.left;
+        }
+
+        while (!stack.isEmpty()) 
+        {
+            TreeNode node = stack.peek();
+            result.add(node.val);
+
+            if (node.right == null) 
+            {
+                node = stack.pop();
+                while (!stack.isEmpty() &amp;&amp; stack.peek().right == node) 
+                {
+                    node = stack.pop();
+                }
+            } 
+            else 
+            {
+                node = node.right;
+                while (node != null) 
+                {
+                    stack.push(node);
+                    node = node.left;
+                }
+            }
+        }
+        return result;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-inorder-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-inorder-traversal/description</a></p>
+<p>JiuZhang. (2018). Binary Tree Inorder Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-inorder-traversal/</a></p>
 ]]></content>
       
         <categories>
