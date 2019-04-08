@@ -3,6 +3,709 @@
   
     
     <entry>
+      <title><![CDATA[Object Pool]]></title>
+      <url>/2019/04/08/Game%20Programming%20Patterns/Object_Pool/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Object Pool</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<blockquote>
+<p>在游戏中何时以及何如管理内存需要十分小心，一个常用而有效的办法就是：在游戏启动时分配一大块内存，直到游戏结束才释放它，但如此一来, 在游戏运行过程中创建和销毁东西，对系统来说是一个巨大的负担。而对象池就是按照我们自己的愿意来分配和释放对象</p>
+<p>定义一个保持可重用的对象集合,其中每一个对象支持  ”in use” “not in use”状态</p>
+<p>当创建一个新对象时你向对象池申请一个请求, 你将搜索到一个可用的对象，并将初始化为“使用中”状态返回给你。当该对象不再被使用时，你将扔回给对象池，改回“未使用”状态。使用该方法, 对象便可以无需进行内存或其他资源分配的情况下进行任意的创建和销毁<br>不要仅仅依赖一个垃圾回收器或只是简单地通过 new 和 delete来进行内存管理，使用对象池，就是你告诉系统：“我更加明白这些字节应该如何处理”，这意味着这个模式的规则完全有你来负责定制</p>
+<p>而对象池可能在闲置的对象上浪费内存, 所以说对象池的大小需要根据游戏的需求量来定制, 过小的话那对象池就没有意义了, 但注意也不能池子太大.</p>
+<p>总得来说不仅避免了频繁开辟回收内存，还能避免额外的CPU开销</p>
+</blockquote>
+<h2 id="Example"><a href="#Example" class="headerlink" title="Example"></a><font color="#ff4200" size="5" face="Calibri"><strong>Example</strong></font></h2><blockquote>
+<p>下面的对象池, 应用在Unity项目中, 估摸着后续还会继续完善和修改</p>
+</blockquote>
+<font color="#002060" size="4" face="Calibri"><strong>Object_Pool.lua</strong></font>
+
+<pre><code>local this = {}
+local GameObject = GameObject
+local Vector3 = Vector3
+
+function this:New(prefab, parent, capcity)
+    if prefab == nil then
+        error(&quot;&lt;color=orange&gt;&quot;..&quot;Object_Pool Prefab Should not be nil&quot;..&quot;&lt;/color&gt;&quot;)
+    end
+    -- 隐藏预制体的时候, 把预制体放到屏幕外, 不使用SetActive(false)
+    -- 所以把预制体的position 直接放到屏幕外的一个节点下 parent：就是屏幕外的节点
+    if parent == nil then
+        error(&quot;&lt;color=orange&gt;&quot;..&quot;while prefab is unused, the prefab doesn&#39;t know where to go&quot;..&quot;&lt;/color&gt;&quot;)
+    end
+
+    local o = {}
+    setmetatable(o, self)
+    self.__index = self
+    o.pool = {}
+    o.obj_Type = prefab
+    o.parent = parent.transform
+    o.capcity = capcity or 4
+    return o 
+end
+
+----------------------------------------------------------------------------
+-- Generate the number of prefab in advance 
+function this:Prewarm(count)
+    if count == nil then
+        count = self.capcity
+    end
+
+    for i = 1, count do
+        local obj = {[&quot;prefab&quot;] = GameObject.Instantiate(self.obj_Type) , [&quot;used&quot;] = false, [&quot;id&quot;] = i} 
+        obj.prefab.name = obj.id 
+        self:Object_Set(obj) 
+        self.pool[i] = obj 
+    end
+end
+
+----------------------------------------------------------------------------
+-- Get one Prefab from Object Pool
+function this:Get()
+    for num = 1, #self.pool do 
+        if (self.pool[num].used == false) then 
+            self.pool[num].used = true 
+            return self.pool[num]
+        end 
+    end  
+
+    local obj = {[&quot;prefab&quot;] = GameObject.Instantiate(self.obj_Type) , [&quot;used&quot;] = true, [&quot;id&quot;] = #self.pool + 1} 
+    obj.prefab.name = obj.id 
+    self:Object_Set(obj)
+    self.pool[obj.id] = obj
+    return self.pool[obj.id]
+end
+
+-----------------------------------------------------------------------------
+-- Recycle one Prefab into Object Pool 
+function this:Put(obj)
+    obj.used = false
+    obj.prefab.transform.parent = self.parent 
+    obj.prefab.transform.localPosition = Vector3.zero
+end
+
+-----------------------------------------------------------------------------
+-- Reset object - Position Rotation Scale 
+function this:Object_Set(obj)
+    obj.prefab.transform.parent = self.parent
+    obj.prefab.transform.localPosition = Vector3.zero
+    obj.prefab.transform.localScale = Vector3.one
+end 
+
+-----------------------------------------------------------------------------
+-- Recycle all the Prefab into Object Pool 
+function this:RecycleAll()
+    for k, v in pairs(self.pool) do 
+        self:Put(v)
+    end 
+end
+
+------------------------------------------------------------------------------
+-- DOKill all the Tween Action and rigidbody 
+function this:DOKill()
+    for k, v in pairs(self.pool) do 
+        v.prefab.transform:DOKill(false)
+        v.prefab:GetComponent(&quot;Rigidbody2D&quot;).isKinematic = true
+    end 
+end 
+
+------------------------------------------------------------------------------
+-- Destroy all the Prefab from Object Pool 
+function this:Clear()
+
+    self:RecycleAll();
+
+    for k, v in pairs(self.pool) do 
+        GameObject.Destroy(v.prefab)
+    end 
+
+    self.pool = nil 
+end
+
+return this
+</code></pre><font color="#002060" size="4" face="Calibri"><strong>How to use</strong></font>
+
+<pre><code>-- 导入类
+local Object_Pool = require(&quot;XXX/Utils/Object_Pool&quot;)    
+
+ -- 对象池初始化
+Apple_Pool = nil 
+local apple = ResManager:LoadAsset(&quot;xxxxxxxx/xxx&quot;, &quot;apple&quot;)
+-- 预生产20个苹果
+Apple_Pool = Object_Pool:New(apple, Parent_Pool, 20)
+Apple_Pool:Prewarm() 
+
+local apple_one = nil 
+
+function produce()
+    apple_one = Apple_Pool:Get()
+    return apple_one.prefab
+end 
+
+function eat()
+    Apple_Pool:Put(apple_one)
+end 
+
+-- Apple Pool Disappear
+Apple_Pool:DOKill()
+Apple_Pool:RecycleAll()
+</code></pre>]]></content>
+      
+        <categories>
+            
+            <category> Game Programming Patterns </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[FSM Lua]]></title>
+      <url>/2019/04/08/Game%20Programming%20Patterns/FSM_Lua/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Finite State Machine</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<blockquote>
+<p>在讲这个设计模式之前, 我先举一个例子, 假如我们现在开发一款游戏, 我们的任务是实现一个角色, 我们需要根据玩家的输入来控制主角的行为。</p>
+<p>那当按下B键时，他应该跳跃但这时有bug，在哪？我们没有阻止主角 “在空中跳跃”，当主角跳起来后持续的按下B键，这样会导致他一直飘在空中，那简单的修复就是添加一个 isJumping 布尔变量来跟踪主角跳跃</p>
+<p>接着，我们要实现主角的闪避动作，当主角站在地面上的时候，玩家按下下方键，则躲避，松开此键则站立, 但这时有bug，在哪？<br>按下, 下方键来闪避，按B键从闪避状态直接跳起来，玩家在空中的时候松开手，玩家还在空中的时候，却显示站立头像，是时候添加另一个布尔标志位来解决问题了 </p>
+<p>接下来，我们在跳起来的过程，进行一次俯冲攻击，这样才酷炫, 但这时又有bug，在哪？我们发现主角在跳跃状态的时候不能再跳，但在俯冲攻击的时候却可以跳跃。又要添加成员变量了。</p>
+<p>很明显，我们这种做法很有问题，每次我们添加一些功能的时候，都会不经意地破坏已有代码的功能。而且我们还有很多行为等动作没有添加，如果我们继续采用类似的做法，那Bug将会可能更多</p>
+<p>你拥有一组状态，并且可以在这组状态之间进行切换，状态机同一时刻只能处于一种状态。每个状态有一组转换，每一个转换和每一个输入并指向另一个状态。 状态机由此而来</p>
+<p>熟知面向对象方法的人来说，每一个条件分支可以用动态分发来解决。状态模式的目的就是将每个状态相关所有的数据和行为封装到相关的类里面。</p>
+</blockquote>
+<h2 id="Example-1"><a href="#Example-1" class="headerlink" title="Example 1"></a><font color="#ff4200" size="5" face="Calibri"><strong>Example 1</strong></font></h2><font color="#002060" size="4" face="Calibri"><strong>FSM.lua</strong></font>
+
+<pre><code>local M = {}
+
+function M:new(...)
+    self.__index = self
+    local ret = setmetatable({},self)
+    ret:init(...)
+    return ret
+end
+
+function M:init()
+    self.StateTable = {}        -- 状态表
+    self.CurState = nil         -- 当前状态
+    self.LastState = nil        -- 当前状态的上一个状态
+end
+
+--- 增加一个状态
+function M:AddState(state)
+    if not self.StateTable[state.State] then
+        self.StateTable[state.State] = state
+    end
+end
+
+--- 删除一个状态
+function M:DeleteState(state)
+    if self.StateTable[state.State] then
+        self.StateTable[state.State] = nil
+    end
+end
+
+--- 切换状态
+function M:TranslateState(state)
+    if not self.StateTable[state] then 
+        error(&quot;&lt;color=orange&gt;&quot;..string.format(&quot;Error : State %s not exist state table&quot;,state)..&quot;&lt;/color&gt;&quot;)
+        return
+    end
+    if nil == self.CurState then
+        self.StateTable[state]:DoEnter()
+        self.CurState = state
+        return
+    end
+    if self.StateTable[self.CurState]:Can(state) then
+        self.StateTable[self.CurState]:DoLeave()
+        self.StateTable[state]:DoEnter() 
+        self.LastState = self.CurState
+        self.CurState = state
+    else
+        error(&quot;&lt;color=orange&gt;&quot;..string.format(&quot;Error : Can&#39;t Translate %s  to %s &quot;,self.CurState,state)..&quot;&lt;/color&gt;&quot;)
+    end
+end
+
+--- 当前状态
+function M:CurrentState()
+    return self.CurState
+end
+
+--- 当前状态的:上一个状态
+function M:lastState()
+    return self.LastState
+end 
+
+return M
+</code></pre><font color="#002060" size="4" face="Calibri"><strong>FSMState.lua</strong></font>
+
+<pre><code>local M = {}
+
+function M:new(...)
+    self.__index = self
+    local ret = setmetatable({},self)
+    ret:init(...)
+    return ret
+end
+
+function M:init(state,transitionTable,onEnterCallBack,onLeaveCallBack)
+    self.State = state                                      -- 状态值
+    self.Transition = transitionTable or {}                 -- 可迁移状态表
+    self.onEnter = onEnterCallBack                          -- 进入时调用
+    self.onLeave = onLeaveCallBack                          -- 离开时操作
+end
+
+--- 进入状态时的操作
+function M:DoEnter()
+    if self.onEnter then
+        self.onEnter(self.State)
+    end
+end
+
+--- 离开该状态时的操作
+function M:DoLeave()
+    if self.onLeave then
+        self.onLeave(self.State)
+    end
+end
+
+--- 是否可切换到指定状态
+function M:Can(state) 
+    return self.Transition[state]
+end
+
+return M
+</code></pre><font color="#002060" size="4" face="Calibri"><strong>How to Use</strong></font>
+
+<pre><code>local Standing_Enter = function()
+    --进入站立状态的行为
+end 
+
+local Standing_Leave = function()
+    --离开站立状态的行为
+end 
+
+local Jumping_Enter = function()
+    --进入跳跃状态的行为
+end 
+
+local Jumping_Leave = function()
+    --离开跳跃状态的行为
+end 
+
+local Ducking_Enter = function()
+    --进入闪避状态的行为
+end 
+
+local Ducking_Leave = function()
+    --离开闪避状态的行为
+end 
+
+function InitFSM()
+    FState = {
+        Standing = 1,
+        Jumping  = 2,
+        Ducking  = 3,
+    }
+
+    local Fsm = require(&quot;.....FSM&quot;)
+    local State = require(&quot;.....FSMState&quot;)
+    FSM = Fsm:new() 
+
+    FSM:AddState(State:new(FState.Standing,{nil, FState.Jumping, FState.Ducking}, Standing_Enter, Standing_Leave))
+    FSM:AddState(State:new(FState.Jumping,{FState.Standing, nil, nil}, Jumping_Enter,Jumping_Leave))
+    FSM:AddState(State:new(FState.Ducking,{FState.Standing, nil, nil}, Ducking_Enter,Ducking_Leave))
+    FSM:TranslateState(FState.Standing) 
+end 
+
+-- 获取当前状态
+function current_GameState()
+    return FSM:CurrentState()
+end 
+
+-- 获取上一个状态
+function last_GameState() 
+    return FSM:lastState()
+end 
+
+-- 改变状态
+function ChangeFState(State)
+    FSM:TranslateState(State)
+end 
+</code></pre><h2 id="Example-2"><a href="#Example-2" class="headerlink" title="Example 2"></a><font color="#ff4200" size="5" face="Calibri"><strong>Example 2</strong></font></h2><font color="#002060" size="4" face="Calibri"><strong>rFSM 状态机</strong></font>
+
+<blockquote>
+<p>以下是rFSM 状态机的使用情况, 这是个人业余时间写的一个小框架(还在搬砖中……), 读者有时间的话可以去下面的 Github连接上浏览代码。</p>
+</blockquote>
+<pre><code>require (&#39;Common.FSM.rfsm&#39;)
+
+local GameState_Manager = Class()
+
+local fsm
+
+-- 加载所有游戏状态对象
+local gameStateType = {} 
+gameStateType.login_state = require(&quot;GameState.login_state&quot;).new()
+gameStateType.user_state = require(&quot;GameState.user_state&quot;).new()
+gameStateType.lobby_state = require(&quot;GameState.lobby_state&quot;).new()
+gameStateType.room_state = require(&quot;GameState.room_state&quot;).new()
+gameStateType.hero_state = require(&quot;GameState.hero_state&quot;).new()
+gameStateType.loading_state = require(&quot;GameState.loading_state&quot;).new()
+gameStateType.play_state = require(&quot;GameState.play_state&quot;).new()
+gameStateType.over_state = require(&quot;GameState.over_state&quot;).new()
+
+-- 建立游戏状态之间的关系
+local game_state_fsm = rfsm.state {
+
+    login_state = rfsm.state{ 
+        entry = gameStateType.login_state.enter,
+        exit = gameStateType.login_state.leave,
+    },
+
+
+
+    rfsm.transition { src=&#39;initial&#39;, tgt=&#39;login_state&#39; },
+    --rfsm.transition { src=&#39;hello&#39;, tgt=&#39;world&#39;, events={ &#39;e_done&#39; } },
+    --rfsm.transition { src=&#39;world&#39;, tgt=&#39;hello&#39;, events={ &#39;e_restart&#39; } },
+}
+
+-- 默认构造函数
+function GameState_Manager:ctor()
+
+end 
+
+-- 进入登录状态
+function GameState_Manager:enter_default_state()
+    fsm = rfsm.init(game_state_fsm)
+    rfsm.run(fsm) 
+end
+
+return GameState_Manager
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>pmsl. (2018). luaFSM. Retrieved from: <a href="https://github.com/pmsl/luaFSM" target="_blank" rel="noopener">https://github.com/pmsl/luaFSM</a></p>
+<p>kmarkus. (2017). rFSM. Retrieved from: <a href="https://github.com/kmarkus/rFSM" target="_blank" rel="noopener">https://github.com/kmarkus/rFSM</a></p>
+<p>preston. (2019). MobileLegend Retrieved from: <a href="https://github.com/Preston-Chen/MobileLegend" target="_blank" rel="noopener">https://github.com/Preston-Chen/MobileLegend</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Game Programming Patterns </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Sort Integers]]></title>
+      <url>/2019/04/07/Sort%20Integers/Sort%20Integers/</url>
+      <content type="html"><![CDATA[<h2 id="Sort-Integers"><a href="#Sort-Integers" class="headerlink" title="Sort Integers"></a><br><font color="#002060" size="6" face="Calibri"><strong>Sort Integers</strong></font><br></h2><p><br><div align="center"><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u2gtzimuj20mk0dv3ze.jpg" alt=""><br></div></p>
+<p><div align="left"><br><br><font color="#002060" size="5" face="华文楷体"><strong>冒泡排序 时间复杂度O(n2)：</strong></font><br></div></p>
+<blockquote>
+<p>一开始交换区间是0到n-1, 也就是整个数组的整体然后第一个数和第二个数之间进行比较，哪个大哪个放在后面，然后第二个数和第三个数之间进行比较，哪个大哪个放在后面，这样依次交换过去。最大的数会放在数组最后的位置，然后把范围从0到n-1到 0到n-2 这样子过来第二大的数会放在数组倒数第二的位置。我们依次进行这样的交互过程，整个数组就变成有序了<br><br></p>
+</blockquote>
+<pre><code>public class Solution {
+    /**
+     * @param A: an integer array
+     * @return: nothing
+     */
+    public void sortIntegers(int[] A) {
+        // write your code here
+        if (A == null || A.length &lt; 2) 
+        {
+               return;
+        }
+
+        while (true) 
+        {
+            boolean exchange = false;
+            for (int i = 0; i &lt; A.length - 1; i++) 
+            {
+                if (A[i] &gt; A[i + 1]) 
+                {
+                    int tmp = A[i];
+                    A[i] = A[i + 1];
+                    A[i + 1] = tmp;
+                    exchange = true;
+                }
+            }
+            if (!exchange) 
+            {
+                break;
+            }
+        }
+    }
+}
+</code></pre><p><br><font color="#002060" size="5" face="华文楷体"><strong>选择排序的时间复杂度O(n2) :</strong></font><br></p>
+<blockquote>
+<p>一开始在整个数组上，从范围0到n-1选择一个最小值，然后把他放在位置0上，然后在1到n-1范围内选择最小值放在1的位置上，这样依次从范围 1,2~n-1,一直只剩下一个数的时候整个数组就变的有序了<br><br></p>
+</blockquote>
+<pre><code>public class Solution {
+    /*
+     * @param A: an integer array
+     * @return: 
+     */
+    public void sortIntegers(int[] A) {
+        // write your code here
+        for (int i = 0; i &lt; A.length; i++) {
+            for (int j = i + 1; j &lt; A.length; j++) {
+                if (A[i] &gt; A[j]) {
+                    int tmp = A[i];
+                    A[i] = A[j];
+                    A[j] = tmp;
+                }
+            }
+        }
+    }
+}
+</code></pre><p><br><font color="#002060" size="5" face="华文楷体"><strong>插入排序的时间复杂度O(n2) :</strong></font><br></p>
+<blockquote>
+<p>首先呢，位置1上的数跟位置0上的数进行比较，如果位置1上的数更小，那么就跟位置0上的数进行交互。那么接下来呢考察位置2上的数, 如果2上的数值记为a的话，a就和它前面的数进行比较, 如果比哪个小就插入到哪里.那么从1位置一直到n-1的位置进行这样的插入过程。最终整个数组变成有序了<br><br></p>
+</blockquote>
+<pre><code>public class Solution {
+    /*
+     * @param A: an integer array
+     * @return: 
+     */
+    public void sortIntegers(int[] A) {
+        // write your code here
+        for (int i = 0; i &lt; A.length; i++) {
+            int newVal = A[i];
+            int j = i - 1;
+
+            while (j &gt;= 0 &amp;&amp; A[j] &gt; newVal) {
+                A[j + 1] = A[j];
+                j--;
+            }
+            A[j + 1] = newVal;
+        }
+    }
+}
+</code></pre><p><br><font color="#002060" size="5" face="华文楷体"><strong>归并排序O( N * logN)  :</strong></font><br></p>
+<blockquote>
+<p>首先让数组中的每一个数，单独成为长度为1的有序区间，然后把相邻为1的有序区间进行合并得到最大长度为2的有序区间，接下来再把相邻有序区间进行合并得到最大长度为4的有序区间。依次这样进行下去4和8 。知道让数组中的所有元素同一成一个数组的有序区间，整个过程就结束<br><br></p>
+</blockquote>
+<pre><code>public class Solution {
+    /**
+     * @param A: an integer array
+     * @return: nothing
+     */
+    public void sortIntegers2(int[] A) {
+        // write your code here
+        int [] temp = new int [A.length];
+        mergeSort(A, 0, A.length - 1, temp);
+    }
+
+    private void mergeSort(int [] A, int start, int end, int [] temp)
+    {
+        //当left == right时,已经不需要在划分了
+        if (start &gt;= end)
+        {
+            return;
+        }
+
+        int left = start, right = end;
+        int mid = (start + end) / 2;
+
+        mergeSort(A, start, mid, temp);     //左子数组
+        mergeSort(A, mid + 1, end, temp);   //右子数组
+        merge(A, start, mid, end, temp);    //合并两个字数组
+    }
+
+    private void merge(int [] A, int start, int mid, int end, int [] temp )
+    {
+        int left = start;
+        int right = mid + 1;
+        int index = start;
+        //比较两个指针所指向的元素，选择相对小的元素放入到合并空间，并移动指针到下一位置
+        while (left &lt;= mid &amp;&amp; right &lt;= end)
+        {
+            if (A[left] &lt; A[right])
+            {
+                temp[index++] = A[left++];
+            }
+            else
+            {
+                temp[index++] = A[right++];
+            }
+        }
+
+        while (left &lt;= mid)
+        {
+            temp[index++] = A[left++];
+        }
+        while (right &lt;= end)
+        {
+            temp[index++] = A[right++];
+        }
+        //把数据复制回原数组
+        for (index = start; index &lt;= end; index++)
+        {
+            A[index] = temp[index];
+        }
+    }
+}
+</code></pre><p><br><font color="#002060" size="5" face="华文楷体"><strong>快速排序O( N * logN)  :</strong></font><br></p>
+<blockquote>
+<p>随机的在数组中选择一个pivot数，小于等于pivot数放在这个数的左边，大于pivot的数放在右边。接下来对左右两个部分分别递归的调用快速排序的过程，这样就使得整个数组变得有序了<br><br></p>
+</blockquote>
+<pre><code>public class Solution {
+    /**
+     * @param A: an integer array
+     * @return: nothing
+     */
+    public void sortIntegers2(int[] A) {
+        // write your code here
+        quickSort(A, 0, A.length - 1);
+    }
+
+    private void quickSort(int[] A, int start, int end) {
+        if (start &gt;= end) {
+            return;
+        }
+
+        int left = start, right = end;
+        // key point 1: pivot is the value, not the index
+        int pivot = A[(start + end) / 2];
+
+        // key point 2: every time you compare left &amp; right, it should be 
+        // left &lt;= right not left &lt; right
+        while (left &lt;= right) {
+            while (left &lt;= right &amp;&amp; A[left] &lt; pivot) {
+                left++;
+            }
+            while (left &lt;= right &amp;&amp; A[right] &gt; pivot) {
+                right--;
+            }
+            if (left &lt;= right) {
+                int temp = A[left];
+                A[left] = A[right];
+                A[right] = temp;
+
+                left++;
+                right--;
+            }
+        }
+
+        quickSort(A, start, right);
+        quickSort(A, left, end);
+    }
+}
+</code></pre><p><br><font color="#002060" size="5" face="华文楷体"><strong>堆排序O( N * logN)  :</strong></font><br></p>
+<blockquote>
+<p>首先把数组中的n个数，建立成大小为n的大根堆。那么我们知道堆顶是我们整个元素的最大值，把这个堆顶的元素和最后一位的数进行交互，然后把最大值脱离出整个堆结构放在数组的最后一个位置，作为数组的有序部分存起来，接下来把堆中数进行调整为大根堆，依次把最大的数放在堆顶的位置，依次把堆顶的位置抽出来。这样子堆的大小会依次减一，那么数组的有序部分依次增加知道把数排序好<br><br></p>
+</blockquote>
+<p><br><font color="#002060" size="5" face="华文楷体"><strong>希尔排序O( N * logN)  :</strong></font><br></p>
+<blockquote>
+<p>希尔排序其实一个插入排序的改良做法，插入排序的步长为1，希尔排序的步长是从大到小调整的,   进行插入操作，知道步长为1的经典插入排序过程<br><br></p>
+</blockquote>
+<p><br><br><br><br><br></p>
+<blockquote>
+<p>其中插入排序，选择排序，冒泡排序都是简单排序，时间复杂度是O(N2),其中插入排序和冒泡排序适合原始序列有序的数组，选择排序的交换和赋值次数会比较少，可以根据不同环境和数据的实际情况和长度选择具体的排序。整体插入排序优于选择排序优于冒泡排序。希尔排序是插入排序的优化，突破了前三个排序O(N2)的时间复杂度，但是本质还是插入排序，突破比较相邻元素的惯性思维，直接比较一定间隔的元素，大幅度减少了逆序调整的比较次数和交换次数，从而达到比较理想的算法复杂度，适合对中等规模数组进行排序。堆排序是利用了最大堆的特点，始终把堆顶元素（最大元素）和最后一个元素替换，再重新构造最大堆，重复执行达到排序的效果。堆结构的特性让算法的复杂度降低到NlgN级别，但是有不方便索引元素的确定，缓存命中率较低。而归并排序则是充分运用了分治原理，把大问题不断的拆分成小问题，进行排序，再合并小数组达到整体排序的目标，归并排序即高效又可靠，唯一的缺点是需要数组长度的辅助空间，在空间成本低的时候适合使用。快速排序则解决了归并排序占用空间的问题，在数组内部用很小的辅助栈，即可完成对元素的分离，再去解决分离后的更小的数组，正常情况下拥有和归并相同级别的时间复杂度，但是得注意选取好切分元素。<br>实际上一个复杂的序列可能用不止一种排序，例如分治和快速排序在分割到很小的序列时再进行分割反而效率不如插入排序等简单排序，可以设置一定的阈值，先用分治或者快速排序的方式分割数组，再转换成插入等简单排序完成最终的排序</p>
+</blockquote>
+<p><br><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>方志朋. (2019). 最详细的排序解析,理解七大排序. Retrieved from: <a href="https://www.cnblogs.com/bigben0123/p/10414202.html" target="_blank" rel="noopener">https://www.cnblogs.com/bigben0123/p/10414202.html</a></p>
+<p>JiuZhang. (2018). Sort Integers. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-integers/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-integers/</a></p>
+<p>JiuZhang. (2018). Sort Integers II. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-integers-ii/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-integers-ii/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Sort Integers </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Word Break]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Word%20Break/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Word Break</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string s and a dictionary of words dict, determine if s can be break into a space-separated sequence of one or more dictionary words.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given s = “lintcode”, dict = [“lint”, “code”].</p>
+<p>Return true because “lintcode” can be break as “lint code”.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzh7vephj20pg0f8gmj.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param s: A string
+     * @param dict: A dictionary of words dict
+     * @return: A boolean
+     */
+
+    //获取字典里 最大的单词长度
+    private int getMaxLength(Set&lt;String&gt; dict) 
+    {
+        int maxLength = 0;
+        for (String word : dict) 
+        {
+            maxLength = Math.max(maxLength, word.length());
+        }
+        return maxLength;
+    }
+
+    public boolean wordBreak(String s, Set&lt;String&gt; dict) 
+    {
+    //Check the Corner Case 
+        if (s == null || s.length() == 0) 
+        {
+            return true;
+        }
+
+        int maxLength = getMaxLength(dict);   //取到单词里面的最大长度
+        boolean[] canSegment = new boolean[s.length() + 1];
+
+        canSegment[0] = true;
+        for (int i = 1; i &lt;= s.length(); i++)   //当去遍历的时候 从后往前割
+        {
+            canSegment[i] = false;
+            for (int lastWordLength = 1;
+                     lastWordLength &lt;= maxLength &amp;&amp; lastWordLength &lt;= i;
+                     lastWordLength++) {  //然后去看下 最后割出来的长度为1个呢 2个呢 还是3个呢 还是到达最大长度？
+                if (!canSegment[i - lastWordLength]) 
+                {
+                    continue;
+                }
+                String word = s.substring(i - lastWordLength, i);  //割完之后把 单词取出来
+                if (dict.contains(word))   //在判断一下在不在词典里面  O(L)的时间复杂度
+                {
+                    canSegment[i] = true;
+                    break;
+                }
+            }
+        }
+
+        return canSegment[s.length()];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Word Break. Retrieved from: <a href="https://www.lintcode.com/problem/word-break/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/word-break/description</a></p>
+<p>JiuZhang. (2018). Word Break. Retrieved from: <a href="https://www.jiuzhang.com/solution/word-break/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/word-break/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Unique Paths]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Unique%20Paths/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Unique Paths</strong></font><br></p>
@@ -34,7 +737,7 @@ R : Right
 6) RDDR
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/xqOdgKK.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzgbg9umj20pe0dpwfk.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -88,12 +791,12 @@ R : Right
     <entry>
       <title><![CDATA[Triangle]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Triangle/</url>
-      <content type="html"><![CDATA[<p><img src="https://i.imgur.com/b2PXIiZ.jpg" alt=""></p>
-<p><img src="https://i.imgur.com/jn5oDDO.jpg" alt=""></p>
-<p><img src="https://i.imgur.com/Cj73qFB.jpg" alt=""></p>
-<p><img src="https://i.imgur.com/kFMuT1l.jpg" alt=""></p>
-<p><img src="https://i.imgur.com/a58czKV.jpg" alt=""></p>
-<p><img src="https://i.imgur.com/hoacavE.jpg" alt=""></p>
+      <content type="html"><![CDATA[<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzdgqgj2j21wv1d9agr.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzdnqt1tj21ww1gqk2a.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzdtv8rgj21ww2ik1dy.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzdyv63ij21ww1fmwmb.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tze5blxbj21wv23e186.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzea983mj21wv1tgall.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
 <p>LintCode. (2018). Triangle. Retrieved from: <a href="https://www.lintcode.com/problem/triangle/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/triangle/description</a></p>
@@ -132,7 +835,7 @@ Explanation:
 Path is: 1 -&gt; 3 -&gt; 2
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/ulPpLlQ.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzcd3g97j20pa0ed3zr.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -205,7 +908,7 @@ Path is: 1 -&gt; 3 -&gt; 2
 <p>A = [3,2,1,0,4], return false.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/zyUWMLs.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz9oi5rkj20ou04374g.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -267,7 +970,7 @@ Path is: 1 -&gt; 3 -&gt; 2
 <p>For [4, 2, 4, 5, 3, 7], the LIS is [2, 4, 5, 7], return 4</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/SSC4HPk.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzbc2a9bj20pp0hddgk.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -314,6 +1017,242 @@ Path is: 1 -&gt; 3 -&gt; 2
     </entry>
     
     <entry>
+      <title><![CDATA[Edit Distance]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Edit%20Distance/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Edit Distance</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given two words word1 and word2, find the minimum number of steps required to convert word1 to word2. (each operation is counted as 1 step.)</p>
+<p>You have the following 3 operations permitted on a word:</p>
+<p>Insert a character</p>
+<p>Delete a character</p>
+<p>Replace a character</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given word1 = “mart” and word2 = “karma”, return 3.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz81c1pxj20p007z0t3.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param word1: A string
+     * @param word2: A string
+     * @return: The minimum number of steps.
+     */
+    public int minDistance(String word1, String word2) 
+    {
+        int n = word1.length();
+        int m = word2.length();
+
+        //state: f[i][j]代表word1的前i个字符,通过最少多少次编辑,能够变成word2的前j个字符
+        int[][] dp = new int[n+1][m+1];         //开个动态的数组
+
+        //initialize
+        for(int i=0; i&lt; m+1; i++)
+        {
+            dp[0][i] = i;     //i  次Insert
+        }
+        for(int i=0; i&lt;n+1; i++)
+        {
+            dp[i][0] = i;      //i  次Delete
+        }
+
+        //function
+        for(int i = 1; i&lt;n+1; i++)   
+        {
+            for(int j=1; j&lt;m+1; j++)
+            {
+                if(word1.charAt(i-1) == word2.charAt(j-1))  //等于的情况
+                {
+                    dp[i][j] = dp[i-1][j-1];
+                }
+                else
+                {
+                    dp[i][j] = 1 + Math.min(dp[i-1][j-1], Math.min(dp[i-1][j], dp[i][j-1]));
+                }
+            }
+        }
+
+        //answer
+        return dp[n][m];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Edit Distance. Retrieved from: <a href="https://www.lintcode.com/problem/edit-distance/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/edit-distance/description</a></p>
+<p>JiuZhang. (2018). Edit Distance. Retrieved from: <a href="https://www.jiuzhang.com/solution/edit-distance/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/edit-distance/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Interleaving String]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Interleaving%20String/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Interleaving String</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given three strings: s1, s2, s3, determine whether s3 is formed by the interleaving of s1 and s2.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input:
+&quot;&quot;
+&quot;&quot;
+&quot;1&quot;
+Output:
+false
+</code></pre><p>Example 2:</p>
+<pre><code>Input:
+&quot;aabcc&quot;
+&quot;dbbca&quot;
+&quot;aadbbcbcac&quot;
+Output:
+true
+</code></pre><p>Example 3:</p>
+<pre><code>Input:
+&quot;aabcc&quot;
+&quot;dbbca&quot;
+&quot;aadbbbaccc&quot;
+Output:
+false
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>O(n2) time or better</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz8zl6wzj20p20c5aav.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param s1: A string
+     * @param s2: A string
+     * @param s3: A string
+     * @return: Determine whether s3 is formed by interleaving of s1 and s2
+     */
+    public boolean isInterleave(String s1, String s2, String s3) 
+    {
+        if (s1.length() + s2.length() != s3.length()) 
+        {
+            return false;
+        }
+
+        boolean [][] interleaved = new boolean[s1.length() + 1][s2.length() + 1];
+        interleaved[0][0] = true;
+
+        for (int i = 1; i &lt;= s1.length(); i++) 
+        {
+            if(s3.charAt(i - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][0])
+                interleaved[i][0] = true;
+        }
+
+        for (int j = 1; j &lt;= s2.length(); j++) 
+        {
+            if(s3.charAt(j - 1) == s2.charAt(j - 1) &amp;&amp; interleaved[0][j - 1])
+                interleaved[0][j] = true;
+        }
+
+        for (int i = 1; i &lt;= s1.length(); i++) 
+        {
+            for (int j = 1; j &lt;= s2.length(); j++) 
+            {
+                if(((s3.charAt(i + j - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][j]))
+                    || ((s3.charAt(i + j - 1)) == s2.charAt(j - 1) &amp;&amp; interleaved[i][j - 1]))
+                interleaved[i][j] = true;
+            }
+        }
+
+        return interleaved[s1.length()][s2.length()];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Interleaving String. Retrieved from: <a href="https://www.lintcode.com/problem/interleaving-string/descriptiondescription" target="_blank" rel="noopener">https://www.lintcode.com/problem/interleaving-string/descriptiondescription</a></p>
+<p>JiuZhang. (2018). Interleaving String. Retrieved from: <a href="https://www.jiuzhang.com/solution/interleaving-string/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/interleaving-string/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Distinct Subsequences]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Distinct%20Subsequences/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Distinct Subsequences</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string S and a string T, count the number of distinct subsequences of S which equals T.</p>
+<p>A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, “ACE” is a subsequence of “ABCDE” while “AEC” is not).</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given S = “rabbbit”, T = “rabbit”, return 3.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Do it in O(n2) time and O(n) memory.</p>
+<p>O(n2) memory is also acceptable if you do not know how to optimize memory.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz755h95j20p309t3yx.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    public int numDistinct(String S, String T) 
+    {
+        if (S == null || T == null) 
+        {
+            return 0;
+        }
+
+        int[][] nums = new int[S.length() + 1][T.length() + 1];
+
+        for (int i = 0; i &lt;= S.length(); i++) 
+        {
+            nums[i][0] = 1;
+        }
+        for (int i = 1; i &lt;= S.length(); i++) 
+        {
+            for (int j = 1; j &lt;= T.length(); j++) 
+            {
+                nums[i][j] = nums[i - 1][j];
+                if (S.charAt(i - 1) == T.charAt(j - 1)) 
+                {
+                    nums[i][j] += nums[i - 1][j - 1];
+                }
+            }
+        }
+        return nums[S.length()][T.length()];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.lintcode.com/problem/distinct-subsequences/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/distinct-subsequences/description</a></p>
+<p>JiuZhang. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.jiuzhang.com/solution/distinct-subsequences/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/distinct-subsequences/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Climbing Stairs]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Climbing%20Stairs/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Climbing Stairs</strong></font><br></p>
@@ -340,7 +1279,7 @@ Explanation:
 only 1 way.
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/CundfRS.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz6i5y27j20p10b574u.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -411,7 +1350,7 @@ hash : [null, 9, null, null, null, 21, 14, null]
 <p>return [null, 9-&gt;null, null, null, null, 21-&gt;null, 14-&gt;null, null]</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/paaZOhI.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz3agztcj20qv03baa3.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>    /**
@@ -504,7 +1443,7 @@ Output:
 [1,-1,1]
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/O6gp400.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz13o4hvj20qu03mwej.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class LRUCache {
@@ -599,6 +1538,72 @@ Output:
     </entry>
     
     <entry>
+      <title><![CDATA[Minimum Size Subarray Sum]]></title>
+      <url>/2019/02/04/Two%20Pointer/Minimum%20Size%20Subarray%20Sum/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Size Subarray Sum</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array of n positive integers and a positive integer s, find the minimal length of a subarray of which the sum ≥ s. If there isn’t one, return -1 instead.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given the array [2,3,1,2,4,3] and s = 7, the subarray [4,3] has the minimal length under the problem constraint.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>If you have figured out the O(nlog n) solution, try coding another solution of which the time complexity is O(n).</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0as8adxj20r7099mxv.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: an array of integers
+     * @param s: An integer
+     * @return: an integer representing the minimum size of subarray
+     */
+    public int minimumSize(int[] nums, int s) 
+    {
+        // write your code here
+        int j = 0, i = 0;
+        int sum =0;
+        int ans = Integer.MAX_VALUE;
+        for(i = 0; i &lt; nums.length; i++) 
+        {
+            //每一次都固体一个左指针，跟新右指针(增大区间来跟新我们的sum)    
+            while(j &lt; nums.length &amp;&amp; sum &lt; s) 
+            {
+                sum += nums[j];
+                j ++;
+            }
+            if(sum &gt;=s) 
+            {
+                ans = Math.min(ans, j - i); //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
+            }
+            sum -= nums[i]; //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+        }
+        if(ans == Integer.MAX_VALUE)
+        {
+            ans = -1;
+        }
+        return ans;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Minimum Size Subarray Sum. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-size-subarray-sum/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-size-subarray-sum/description</a></p>
+<p>JiuZhang. (2018). Minimum Size Subarray Sum. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-size-subarray-sum/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-size-subarray-sum/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Remove Nth Node From End of List]]></title>
       <url>/2019/02/04/LinkedList/Remove%20Nth%20Node%20From%20End%20of%20List/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Remove Nth Node From End of List</strong></font><br></p>
@@ -618,7 +1623,7 @@ Output: 5-&gt;4-&gt;3-&gt;1-&gt;null
 <p>Can you do it without getting the length of the linked list?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/uO2YZJl.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u019y6ayj20r809lmyb.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>    /**
@@ -683,6 +1688,173 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Wiggle Sort II]]></title>
+      <url>/2019/02/04/Two%20Pointer/Wiggle%20Sort%20II/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Wiggle Sort II</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an unsorted array nums, reorder it such that</p>
+<p>nums[0] &lt; nums[1] &gt; nums[2] &lt; nums[3]….</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given nums = [1, 5, 1, 1, 6, 4], one possible answer is [1, 4, 1, 5, 1, 6].</p>
+<p>Given nums = [1, 3, 2, 2, 3, 1], one possible answer is [2, 3, 1, 3, 1, 2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you do it in O(n) time and/or in-place with O(1) extra space?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0l27i0jj20qu05574n.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param nums: A list of integers
+     * @return: nothing
+     */
+    public static void wiggleSort(int[] nums) 
+    {
+        int[] tem = new int[nums.length];
+        for (int i = 0; i &lt; nums.length; i++) 
+        {
+            tem[i] = nums[i];
+        }
+        int mid = partition(tem, 0, nums.length-1, nums.length/2);   //用Partition的方式寻找中间值
+        int[] ans = new int[nums.length];
+        for (int i = 0; i &lt; nums.length; i++) 
+        {
+            ans[i] = mid;
+        }
+        int l, r;
+        if (nums.length % 2 == 0) //数组的长度为偶数时
+        {
+            l = nums.length - 2;
+            r = 1;
+            for (int i = 0; i &lt; nums.length; i++) 
+            {
+                if (nums[i] &lt; mid) 
+                {
+                    ans[l] = nums[i];
+                    l -= 2;
+                } 
+                else if (nums[i] &gt; mid) 
+                {
+                    ans[r] = nums[i];
+                    r += 2;
+                }
+            }
+        } 
+        else //数组的长度为奇数时
+        {
+            l = 0;
+            r = nums.length - 2;
+            for (int i = 0; i &lt; nums.length; i++) 
+            {
+                if (nums[i] &lt; mid) 
+                {
+                    ans[l] = nums[i];
+                    l += 2;
+                } 
+                else if (nums[i] &gt; mid) 
+                {
+                    ans[r] = nums[i];
+                    r -= 2;
+                }
+            }
+        }
+        for (int i = 0; i &lt; nums.length; i++) 
+        {
+            nums[i] = ans[i];
+        }
+    }
+
+    public static int partition(int[] nums, int l, int r, int rank) 
+    {
+        int left = l, right = r;
+        int now = nums[left];
+        while (left &lt; right) 
+        {   //从小到大排序
+            while (left &lt; right &amp;&amp; nums[right] &gt;= now) 
+            {
+                right--;
+            }
+            nums[left] = nums[right];
+            while (left &lt; right &amp;&amp; nums[left] &lt;= now) 
+            {
+                left++;
+            }
+            nums[right] = nums[left];
+        }
+        if (left - l == rank) 
+        {
+            return now;
+        } 
+        else if (left - l &lt; rank) //在右边区域找
+        {
+            return partition(nums, left + 1, r, rank - (left - l + 1));
+        } 
+        else //在左边区域找
+        {
+            return partition(nums, l, right - 1, rank);
+        }
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Wiggle Sort II. Retrieved from: <a href="https://www.lintcode.com/problem/wiggle-sort-ii/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/wiggle-sort-ii/description</a></p>
+<p>JiuZhang. (2018). Wiggle Sort II. Retrieved from: <a href="https://www.jiuzhang.com/solution/wiggle-sort-ii/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/wiggle-sort-ii/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Nuts & Bolts Problem]]></title>
+      <url>/2019/02/04/Two%20Pointer/Nuts%20&amp;%20Bolts%20Problem/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Nuts &amp; Bolts Problem</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a set of n nuts of different sizes and n bolts of different sizes. There is a one-one mapping between nuts and bolts.</p>
+<p>Comparison of a nut to another nut or a bolt to another bolt is not allowed. It means nut can only be compared with bolt and bolt can only be compared with nut to see which one is bigger/smaller. We will give you a compare function to compare nut with bolt.</p>
+<p>Using the function we give you, you are supposed to sort nuts or bolts, so that they can map in order.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given nuts = [‘ab’,’bc’,’dd’,’gg’], bolts = [‘AB’,’GG’, ‘DD’, ‘BC’].</p>
+<p>Your code should find the matching of bolts and nuts.</p>
+<p>According to the function, one of the possible return:</p>
+<p>nuts = [‘ab’,’bc’,’dd’,’gg’], bolts = [‘AB’,’BC’,’DD’,’GG’].</p>
+<p>If we give you another compare function, the possible return is the following:</p>
+<p>nuts = [‘ab’,’bc’,’dd’,’gg’], bolts = [‘BC’,’AA’,’DD’,’GG’].</p>
+<p>So you must use the compare function that we give to do the sorting.</p>
+<p>The order of the nuts or bolts does not matter. You just need to find the matching bolt for each nut.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0cixyahj20ri0fw75g.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0d1gappj21ww2kltob.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0d6gcgwj21ww2letj2.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Nuts &amp; Bolts Problem. Retrieved from: <a href="https://www.lintcode.com/problem/nuts-bolts-problem/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/nuts-bolts-problem/description</a></p>
+<p>JiuZhang. (2018). Nuts &amp; Bolts Problem. Retrieved from: <a href="https://www.jiuzhang.com/solution/nuts-bolts-problem/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/nuts-bolts-problem/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Partition Array by Odd and Even]]></title>
       <url>/2019/02/04/Two%20Pointer/Partition%20Array%20by%20Odd%20and%20Even/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Partition Array by Odd and Even</strong></font><br></p>
@@ -697,7 +1869,7 @@ public class Solution {
 <p>Do it in-place.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/kyFVZHd.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0e1gjn5j20r802nq2z.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -754,6 +1926,100 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Longest Substring with At Most K Distinct Characters]]></title>
+      <url>/2019/02/04/Two%20Pointer/Longest%20Substring%20with%20At%20Most%20K%20Distinct%20Characters/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Substring with At Most K Distinct Characters</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string S, find the length of the longest substring T that contains at most k distinct characters.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input: S = &quot;eceba&quot; and k = 3
+Output: 4
+Explanation: T = &quot;eceb&quot;
+</code></pre><p>Example 2:</p>
+<pre><code>Input: S = &quot;WORLD&quot; and k = 4
+Output: 4
+Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>O(n) time</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u09rjkkaj20r506g0t4.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param s: A string
+     * @param k: An integer
+     * @return: An integer
+     */
+    public int lengthOfLongestSubstringKDistinct(String s, int k) 
+    {
+        //Check the Corner Case 
+        if (s == null || s.length() == 0 || k == 0) 
+        {
+            return 0;
+        }
+        HashMap&lt;Character, Integer&gt; map = new HashMap&lt;Character, Integer&gt;();
+        int strLength = s.length();
+        int i = 0;
+        int j = 0;
+        int ans = Integer.MIN_VALUE;
+
+        for (i = 0; i &lt; strLength; i++)   //固定左指针
+        {
+            while (j &lt; strLength)   //每次跟新右指针
+            {
+                char ch_j = s.charAt(j);
+                if (!map.containsKey(ch_j))  //这个元素没有就添加
+                {
+                    if (map.size() == k)  //所包含的元素个数等于目标K
+                    {
+                        break;
+                    }
+                    map.put(ch_j, 1);
+                } 
+                else 
+                {
+                    map.put(ch_j, map.get(ch_j) + 1);
+                }
+                j++;
+            }
+            ans = Math.max(ans, j - i);  //每次左右指针移动 都更新区间范围
+            char ch_i = s.charAt(i);
+            if (map.containsKey(ch_i))  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+            {
+                if (map.get(ch_i) - 1 == 0) 
+                {
+                    map.remove(ch_i);
+                } 
+                else 
+                {
+                    map.put(ch_i, map.get(ch_i) - 1);
+                }
+            }
+        }
+        return ans;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Longest Substring with At Most K Distinct Characters. Retrieved from: <a href="https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Valid Palindrome]]></title>
       <url>/2019/02/04/Two%20Pointer/Valid%20Palindrome/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Valid Palindrome</strong></font><br></p>
@@ -769,7 +2035,7 @@ public class Solution {
 <p>O(n) time without extra memory.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/KBwSoNF.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0jufn2zj20qv03jmxd.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -838,6 +2104,340 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Sort Colors]]></title>
+      <url>/2019/02/04/Two%20Pointer/Sort%20Colors/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Colors</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.</p>
+<p>Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given [1, 0, 1, 2], sort it in-place to [0, 1, 1, 2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>A rather straight forward solution is a two-pass algorithm using counting sort.<br>First, iterate the array counting number of 0’s, 1’s, and 2’s, then overwrite array with total number of 0’s, then 1’s and followed by 2’s.</p>
+<p>Could you come up with an one-pass algorithm using only constant space?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0g0q5gtj20rk07vt99.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: A list of integer which is 0, 1 or 2 
+     * @return: nothing
+     */
+   public void sortColors(int[] a) 
+   {
+        //Check the corner case 
+        if (a == null || a.length &lt;= 1) 
+        {
+            return;
+        }
+
+        int left = 0;  //初始化左指针
+        int right = a.length - 1;  //初始化右指针
+        int i = 0;  //准备遍历
+        while (i &lt;= right) 
+        {
+            if (a[i] == 0)  //遇到红球就往左指针扔
+            {
+                swap(a, left, i);
+                left++;
+                i++;
+            } 
+            else if(a[i] == 1) //遇到白球啥都不动
+            {
+                i++;
+            } 
+            else   //遇到蓝球就往右指针扔
+            {
+                swap(a, right, i);
+                right--;
+            }
+        }
+    }
+
+    private void swap(int[] a, int i, int j) 
+    {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp; 
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Sort Colors. Retrieved from: <a href="https://www.lintcode.com/problem/sort-colors/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-colors/description</a></p>
+<p>JiuZhang. (2018). Sort Colors. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-colors/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-colors/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Sort Letters by Case]]></title>
+      <url>/2019/02/04/Two%20Pointer/Sort%20Letters%20by%20Case/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Letters by Case</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string which contains only letters. Sort it by lower case first and upper case second.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>For “abAcD”, a reasonable answer is “acbAD”</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Do it in one-pass and in-place.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0gragtaj20r202dq2z.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param chars: The letter array you should sort by Case
+     * @return: nothing
+     */
+    public void sortLetters(char[] chars) 
+    {
+        //check the corner case     
+        if(chars == null || chars.length == 0) 
+        {
+            return;
+        }
+        int left = 0, right = chars.length - 1;
+        while (left &lt;= right) 
+        {
+            while (left &lt;= right &amp;&amp; Character.isLowerCase(chars[left]))  //遇到小写指针往前走
+            {
+                left++;
+            }
+
+            while (left &lt;= right &amp;&amp; Character.isUpperCase(chars[right]))  //遇到大写指针往后走
+            {
+                right--;
+            }
+
+            if (left &lt;= right) 
+            {
+                char temp = chars[left];
+                chars[left] = chars[right];
+                chars[right] = temp;
+
+                left++;
+                right--;
+            }
+        }
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Sort Letters by Case. Retrieved from: <a href="https://www.lintcode.com/problem/sort-letters-by-case/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-letters-by-case/description</a></p>
+<p>JiuZhang. (2018). Sort Letters by Case. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-letters-by-case/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-letters-by-case/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Minimum Window Substring]]></title>
+      <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string source and a string target, find the minimum window in source which will contain all the characters in target.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Clarification</strong></font>
+
+<p>Should the characters in minimum window has the same order in target?</p>
+<p>Not necessary.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input:
+&quot;&quot;
+&quot;&quot;
+Output:
+&quot;&quot;
+</code></pre><p>Example 2:</p>
+<pre><code>Input:
+&quot;ADOBECODEBANC&quot;
+&quot;ABC&quot;
+Output:
+&quot;BANC&quot;
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you do it in time complexity O(n) ?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0buapzej20r604t0t8.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    int initTargetHash(int []targethash, String Target) 
+    {
+        int targetnum =0 ;
+        for (char ch : Target.toCharArray()) 
+        {
+            targetnum++;  //目标字符串的总个数
+            targethash[ch]++;  //当前字符总出现个数
+        }
+        return targetnum;
+    }
+    //检查当前窗口中的Substring是否包含了目标字符串中全部字符
+    boolean valid(int []sourcehash, int []targethash) 
+    {
+        for(int i = 0; i &lt; 256; i++) 
+        {
+            if(targethash[i] &gt; sourcehash[i])    
+                return false;
+        }
+        return true;
+    }
+    public String minWindow(String Source, String Target) 
+    {
+        // queueing the position that matches the char in T
+        int ans = Integer.MAX_VALUE;
+        String minStr = &quot;&quot;;
+
+        int[] sourcehash = new int[256];
+        int[] targethash = new int[256];
+
+        initTargetHash(targethash, Target);
+        int j = 0, i = 0;
+        for(i = 0; i &lt; Source.length(); i++) 
+        {
+            while( !valid(sourcehash, targethash) &amp;&amp; j &lt; Source.length()  ) 
+            {
+                sourcehash[Source.charAt(j)]++;
+                j++;
+            }
+            if(valid(sourcehash, targethash) ) //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
+            {
+                if(ans &gt; j - i )   
+                {
+                    ans = Math.min(ans, j - i );
+                    minStr = Source.substring(i, j );
+                }
+            }
+            sourcehash[Source.charAt(i)]--;  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+        }
+        return minStr;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-window-substring/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-window-substring/description</a></p>
+<p>JiuZhang. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-window-substring/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-window-substring/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Partition Array]]></title>
+      <url>/2019/02/04/Two%20Pointer/Partition%20Array/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Partition Array</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array nums of integers and an int k, partition the array (i.e move the elements in “nums”) such that:</p>
+<p>All elements &lt; k are moved to the left</p>
+<p>All elements &gt;= k are moved to the right</p>
+<p>Return the partitioning index, i.e the first index i nums[i] &gt;= k.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input:
+[],9
+Output:
+0
+</code></pre><p>Example 2:</p>
+<pre><code>Input:
+[3,2,2,1],2
+Output:1
+Explanation:
+the real array is[1,2,2,3].So return 1
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you partition the array in-place and in O(n)?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0f49xtvj20qw036glp.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: The integer array you should partition
+     * @param k: An integer
+     * @return: The index after partition
+     */
+    public int partitionArray(int[] nums, int k) 
+    {
+    //check the corner case     
+        if(nums == null || nums.length == 0) 
+        {
+            return 0;
+        }
+
+        int left = 0, right = nums.length - 1;
+        while (left &lt;= right) 
+        {
+            while (left &lt;= right &amp;&amp; nums[left] &lt; k)  //当左指针符合条件时,就跳过继续向左移动
+            {
+                left++;
+            }
+
+            while (left &lt;= right &amp;&amp; nums[right] &gt;= k)  //当右指针符合条件时,就跳过继续向右移动
+            {
+                right--;
+            }
+
+            if (left &lt;= right) //挑出不符合条件的左右指针,对换位置
+            {
+                int temp = nums[left];
+                nums[left] = nums[right];
+                nums[right] = temp;
+
+                left++;
+                right--;
+            }
+        }
+        return left; //最后返回参数的索引值
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Partition Array. Retrieved from: <a href="https://www.lintcode.com/problem/partition-array/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/partition-array/description</a></p>
+<p>JiuZhang. (2018). Partition Array. Retrieved from: <a href="https://www.jiuzhang.com/solution/partition-array/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/partition-array/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Kth Largest Element]]></title>
       <url>/2019/02/04/Two%20Pointer/Kth%20Largest%20Element/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Kth Largest Element</strong></font><br></p>
@@ -850,7 +2450,7 @@ public class Solution {
 <p>In array [1,2,3,4,5], the 1st largest element is 5, 2nd largest element is 4, 3rd largest element is 3 and etc.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/jzzPGjd.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u07fdx3cj20r20643z8.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding1</strong></font>
 
 <pre><code>class Solution {
@@ -992,6 +2592,236 @@ public class Solution {
     </entry>
     
     <entry>
+      <title><![CDATA[Container With Most Water]]></title>
+      <url>/2019/02/04/Two%20Pointer/Container%20With%20Most%20Water/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Container With Most Water</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given n non-negative integers a1, a2, …, an, where each represents a point at coordinate (i, ai). n vertical lines are drawn such that the two endpoints of line i is at (i, ai) and (i, 0). Find two lines, which together with x-axis forms a container, such that the container contains the most water.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input: [1, 3, 2]
+Output: 2
+Explanation:
+Selecting a1, a2, capacity is 1 * 1 = 1
+Selecting a1, a3, capacity is 1 * 2 = 2
+Selecting a2, a3, capacity is 2 * 1 = 2
+</code></pre><p>Example 2:</p>
+<pre><code>Input: [1, 3, 2, 2]
+Output: 4
+Explanation:
+Selecting a1, a2, capacity is 1 * 1 = 1
+Selecting a1, a3, capacity is 1 * 2 = 2
+Selecting a1, a4, capacity is 1 * 3 = 3
+Selecting a2, a3, capacity is 2 * 1 = 2
+Selecting a2, a4, capacity is 2 * 2 = 4
+Selecting a3, a4, capacity is 2 * 1 = 2
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u06ls09fj20r60bc74w.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param heights: a vector of integers
+     * @return: an integer
+     */
+    int computeArea(int left, int right,  int[] heights) 
+    {
+        return (right-left)*Math.min(heights[left], heights[right]);  //底板 * 左右指针的最小值  = 面积(灌水量)
+    }
+
+    public int maxArea(int[] heights) 
+    {
+        // 初始化左右指针,和面积
+        int left = 0, ans=  0 ; 
+        int right = heights.length - 1;
+        while(left &lt;= right) 
+        {
+            ans = Math.max(ans,computeArea(left, right, heights));
+            if(heights[left]&lt;=heights[right])
+            {
+                left++;
+            }
+            else
+            {
+                right--; 
+            }
+        }
+        return ans;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Container With Most Water. Retrieved from: <a href="https://www.lintcode.com/problem/container-with-most-water/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/container-with-most-water/description</a></p>
+<p>JiuZhang. (2018). Container With Most Water. Retrieved from: <a href="https://www.jiuzhang.com/solution/container-with-most-water/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/container-with-most-water/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Trapping Rain Water]]></title>
+      <url>/2019/02/04/Two%20Pointer/Trapping%20Rain%20Water/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Trapping Rain Water</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining.</p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0hdy1ktj20qg06o3yj.jpg" alt=""></p>
+<p>Example<br>Given [0,1,0,2,1,0,1,3,2,1,2,1], return 6.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0hje34fj20r405074k.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param heights: a list of integers
+     * @return: a integer
+     */
+    public int trapRainWater(int[] heights) 
+    {
+        // write your code here
+        int left = 0; 
+        int right = heights.length - 1; 
+        int res = 0;
+        if(left &gt;= right) //当两个指针相邻和碰撞时就返回值
+        {
+            return res;
+        }
+        int leftheight = heights[left];
+        int rightheight = heights[right];
+        while(left &lt; right) 
+        {
+            if(leftheight &lt; rightheight) //根据木桶理论去移动两个指针
+            {
+                left ++;
+                if(leftheight &gt; heights[left])  //从左边开始扫可以看出如果前一指针高比后一指针高低，我们才能蓄水
+                {
+                    res += (leftheight - heights[left]);
+                } 
+                else //如果不能蓄水我们的指针就直接往前移动
+                {
+                    leftheight = heights[left];
+                }
+            } 
+            else 
+            {
+                right --;
+                if(rightheight &gt; heights[right]) //右边开始的思路与上面相反而言
+                {
+                    res += (rightheight - heights[right]);
+                } 
+                else 
+                {
+                    rightheight = heights[right];
+                }
+            }
+        }
+        return res;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Trapping Rain Water. Retrieved from: <a href="https://www.lintcode.com/problem/trapping-rain-water/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/trapping-rain-water/description</a></p>
+<p>JiuZhang. (2018). Trapping Rain Water. Retrieved from: <a href="https://www.jiuzhang.com/solution/trapping-rain-water/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/trapping-rain-water/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Triangle Count]]></title>
+      <url>/2019/02/04/Two%20Pointer/Triangle%20Count/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Triangle Count</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array of integers, how many three numbers can be found in the array, so that we can build an triangle whose three edges length is the three numbers that we find?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input: [3, 4, 6, 7]
+Output: 3
+Explanation:
+They are (3, 4, 6), 
+         (3, 6, 7),
+         (4, 6, 7)
+</code></pre><p>Example 2:</p>
+<pre><code>Input: [4, 4, 4, 4]
+Output: 4
+Explanation:
+Any three numbers can form a triangle. 
+So the answer is C(3, 4) = 4
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0io2k4yj20qw03bjri.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param S: A list of integers
+     * @return: An integer
+     */
+    public int triangleCount(int[] S) 
+    {
+        // check the corner case
+        if (S.length &lt; 3)
+        {
+            return 0;
+        }
+
+        Arrays.sort(S);
+        int count = 0;
+
+        for (int i = 2; i &lt; S.length; i++)
+        {
+            int left = 0; //左指针在最左边
+            int right = i - 1; //右指针在中间 
+
+            while(left &lt; right)
+            {
+                if (S[left] + S[right] &gt; S[i])  //跟最右边的target去比较
+                {
+                    count += right - left; //只要确认左右指针是成立的,那么他们区间范围的任何一个数也都符合三角形定理
+                    right--;
+                }
+                else
+                {
+                    left++;
+                }
+            }
+        }
+        return count;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Triangle Count. Retrieved from: <a href="https://www.lintcode.com/problem/triangle-count/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/triangle-count/description</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Two Sum II - Input array is sorted]]></title>
       <url>/2019/02/04/Two%20Pointer/Two%20Sum%20II%20-%20Input%20array%20is%20sorted/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Two Sum II - Input array is sorted</strong></font><br></p>
@@ -1005,7 +2835,7 @@ public class Solution {
 <p>return [1, 2]</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/nVlKZLo.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0j8dltwj20qs02lglk.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1072,7 +2902,7 @@ Output:[]
 Output:    [[-1, 0, 1],[-1, -1, 2]]
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/Z2WKmlR.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u04wg7dfj20qw03wq33.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1183,7 +3013,7 @@ Output:
 ,[-2, 0, 0, 2]]
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/aSsdREj.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u05x79s7j20qu053aae.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1283,7 +3113,7 @@ Explanation:
 -1+2+1=2
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/XPYqYeY.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u03t3yixj20r003njrj.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1379,7 +3209,7 @@ Explanation:
       Given a string and an offset, rotate string by offset. (rotate from left to right)
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/BddwjQ8.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz5dkxm3j20pv058glq.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding1</strong></font>
 
 <pre><code>public class Solution {
@@ -1426,6 +3256,91 @@ Explanation:
     </entry>
     
     <entry>
+      <title><![CDATA[Copy Books]]></title>
+      <url>/2019/02/02/Binary%20Search/Copy%20Books/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Copy Books</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given n books and the ith book has A[i] pages. You are given k people to copy the n books.</p>
+<p>n books list in a row and each person can claim a continous range of the n books. For example one copier can copy the books from ith to jth continously, but he can not copy the 1st book, 2nd book and 4th book (without 3rd book).</p>
+<p>They start copying books at the same time and they all cost 1 minute to copy 1 page of a book. What’s the best strategy to assign books so that the slowest copier can finish at earliest time?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given array A = [3,2,4], k = 2.</p>
+<p>Return 5( First person spends 5 minutes to copy book 1 and book 2 and second person spends 4 minutes to copy book 3. )</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txw9iv26j20r404st93.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param pages: an array of integers
+     * @param k: An integer
+     * @return: an integer
+     */
+    public int copyBooks(int[] pages, int k) 
+    {
+        if (pages.length == 0) return 0;
+
+        int min = 0;
+        int max = Integer.MAX_VALUE;
+        while (min + 1 &lt; max) 
+        {
+            int guess = min + (max - min) / 2;  //假设已经找到最长时间值
+            if (valid(pages, k, guess))
+            {
+                max = guess;
+            }
+            else
+            {
+                min = guess;
+            }
+        }
+
+        if (valid(pages, k, max))
+        {
+            return max;
+        }
+        return min;
+    }
+
+    private boolean valid(int[] pages, int k, int guessMaxTime) 
+    {
+        int numOfPersons = 0;
+        int remainTime = 0;
+        for(int pageCount : pages) 
+        {
+            if (pageCount &gt; guessMaxTime)  //我们所评估的值有点小了，下次再大点
+            {
+                return false;
+            }
+            if (pageCount &gt; remainTime) //我们安排一个人去工作，然后给了他最大工作时间
+            {
+                numOfPersons++;
+                remainTime = guessMaxTime;
+            }
+            remainTime -= pageCount; //每次进来这里这个人的工作时间都在减少，如果不够就从新加人了
+        }
+        return numOfPersons &lt;= k; //然后判断这个时间所给出的人数是否匹配
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Copy Books. Retrieved from: <a href="https://www.lintcode.com/problem/copy-books/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/copy-books/description</a></p>
+<p>JiuZhang. (2018). Copy Books. Retrieved from: <a href="https://www.jiuzhang.com/solution/copy-books/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/copy-books/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Search for a Range]]></title>
       <url>/2019/02/02/Binary%20Search/Search%20for%20a%20Range/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Search for a Range</strong></font><br></p>
@@ -1439,7 +3354,7 @@ Explanation:
 <p>return [3, 4].</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/JfUpxZc.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty6mpvk5j20qf02u3yk.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1559,7 +3474,7 @@ Given [2, 2, 3, 4, 6] and target = 4, return 1.
 Given [1, 2, 3, 4, 5] and target = 6, return 0.
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/mlBzYFm.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tybqa7b1j20r202qq2y.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1661,6 +3576,580 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
     </entry>
     
     <entry>
+      <title><![CDATA[Divide Two Integers]]></title>
+      <url>/2019/02/02/Binary%20Search/Divide%20Two%20Integers/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Divide Two Integers</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Divide two integers without using multiplication, division and mod operator.</p>
+<p>If it is overflow, return 2147483647</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given dividend = 100 and divisor = 9, return 11.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txxay3lfj20qt03iglt.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param dividend: the dividend
+     * @param divisor: the divisor
+     * @return: the result
+     */
+    public int divide(int dividend, int divisor) 
+    {
+    //check the corner case 
+        if (divisor == 0)     //如果除数为0, 则被除数为正时，结果为正无穷，否则为负无穷
+        {
+             return dividend &gt;= 0? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        }
+
+        if (dividend == 0)  //如果被除数为0,则返回0
+        {
+            return 0;
+        }
+
+        if (dividend == Integer.MIN_VALUE &amp;&amp; divisor == -1)  //如果被除数为负无穷大,除数为-1,则返回正无穷大
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        boolean isNegative = (dividend &lt; 0 &amp;&amp; divisor &gt; 0) || 
+                             (dividend &gt; 0 &amp;&amp; divisor &lt; 0);  //记录结果符号(即是同号为+ ，异号为负)
+
+        //除数和被除数取绝对值,为了防止溢出，所以转换成long之后再取绝对值
+        long a = Math.abs((long)dividend);
+        long b = Math.abs((long)divisor);
+        int result = 0;
+        while(a &gt;= b)
+        {
+            int shift = 0;
+            while(a &gt;= (b &lt;&lt; shift)) //获取 商
+            {
+                shift++;
+            }
+            a -= b &lt;&lt; (shift - 1);
+            result += 1 &lt;&lt; (shift - 1);
+        }
+        return isNegative? -result: result;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Divide Two Integers. Retrieved from: <a href="https://www.lintcode.com/problem/divide-two-integers/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/divide-two-integers/description</a></p>
+<p>JiuZhang. (2018). Divide Two Integers. Retrieved from: <a href="https://www.jiuzhang.com/solution/divide-two-integers/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/divide-two-integers/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[wood-cut]]></title>
+      <url>/2019/02/02/Binary%20Search/wood-cut/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：wood-cut</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given n pieces of wood with length L[i] (integer array). Cut them into small pieces to guarantee you could have equal or more than k pieces with the same length. What is the longest length you can get from the n pieces of wood? Given L &amp; k, return the maximum length of the small pieces.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>For L=[232, 124, 456], k=7, return 114.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyeo15loj20pl07uwev.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param L: Given n pieces of wood with length L[i]
+     * @param k: An integer
+     * @return: The maximum length of the small pieces
+     */
+    public int woodCut(int[] L, int k) 
+    {
+        int l = 1;
+        int r = 0;
+        for (int item : L)  //找到二分法的右边区间:取最长木条的长度
+        {
+            r = Math.max(r, item);
+        }
+
+        while (l + 1 &lt; r) 
+        {
+            int mid = l + (r - l) / 2;
+            if (count(L, mid) &gt;= k)  //符合条件的话,这一小段木条可以再长一点吗
+            {
+                l = mid;
+            } 
+            else  //不合符条件 小段木条要短一点咯
+            {
+                r = mid;
+            }
+        }
+
+        if (count(L, r) &gt;= k)  //找到木条小段的 符合条件的第一长
+        {
+            return r;
+        }
+
+        if (count(L, l) &gt;= k) 
+        {
+            return l;
+        }
+        return 0;
+    }
+
+    private int count(int[] L, int len) //几个木条,根据参数切割后，一共可以获取几小段
+    {
+        int sum = 0;
+        for (int item : L) 
+        {
+            sum += item / len;
+        }
+        return sum;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). wood-cut. Retrieved from: <a href="https://www.lintcode.com/problem/wood-cut/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/wood-cut/description</a></p>
+<p>JiuZhang. (2018). wood-cut. Retrieved from: <a href="https://www.jiuzhang.com/solution/wood-cut/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/wood-cut/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[First Bad Version]]></title>
+      <url>/2019/02/02/Binary%20Search/First%20Bad%20Version/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：First Bad Version</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>The code base version is an integer start from 1 to n. One day, someone committed a bad version in the code case, so it caused this version and the following versions are all failed in the unit tests. Find the first bad version.</p>
+<p>You can call isBadVersion to help you determine which version is the first bad one. The details interface can be found in the code’s annotation part.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given n = 5:</p>
+<pre><code>isBadVersion(3) -&gt; false
+isBadVersion(5) -&gt; true
+isBadVersion(4) -&gt; true
+</code></pre><p>Here we are 100% sure that the 4th version is the first bad version.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty23k31nj20qo03s0sv.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>/**
+ * public class SVNRepo {
+ *     public static boolean isBadVersion(int k);
+ * }
+ * you can use SVNRepo.isBadVersion(k) to judge whether 
+ * the kth code version is bad or not.
+*/
+
+public class Solution {
+    /*
+     * @param n: An integer
+     * @return: An integer which is the first bad version.
+     */
+    public int findFirstBadVersion(int n) 
+    {
+        int start = 1, end = n;
+        while (start + 1 &lt; end) 
+        {
+            int mid = start + (end - start) / 2;
+            if (SVNRepo.isBadVersion(mid))   //找到是错误的版本,就继续往前推
+            {
+                end = mid;
+            } 
+            else  //如果是正确的就往后推
+            {
+                start = mid;
+            }
+        }
+
+        if (SVNRepo.isBadVersion(start)) 
+        {
+            return start;
+        }
+        return end;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). First Bad Version. Retrieved from: <a href="https://www.lintcode.com/problem/first-bad-version/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/first-bad-version/description</a></p>
+<p>JiuZhang. (2018). First Bad Version. Retrieved from: <a href="https://www.jiuzhang.com/solution/first-bad-version/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/first-bad-version/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[maximum number in mountain sequence]]></title>
+      <url>/2019/02/02/Binary%20Search/maximum%20number%20in%20mountain%20sequence/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：maximum number in mountain sequence</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty30rzgzj20re093wf5.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param nums: a mountain sequence which increase firstly and then decrease
+     * @return: then mountain top
+     */
+    public int mountainSequence(int[] nums) 
+    {
+        // check the corner case
+        if (nums == null || nums.length == 0)
+        {
+            throw new IllegalArgumentException();
+        }
+
+        int start = 0;
+        int end = nums.length - 1;
+        int mid; 
+
+        while (start + 1 &lt; end)
+        {
+            mid = start + (end - start) / 2 
+            if (nums[mid + 1] - nums[mid] &gt; 0)
+            {
+                start = mid;
+            } 
+            else 
+            {
+                end = mid;
+            }
+        }
+        return Math.max (nums[start], nums[end]);            
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). maximum number in mountain sequence. Retrieved from: <a href="https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Sqrt(x)]]></title>
+      <url>/2019/02/02/Binary%20Search/Sqrt(x)/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sqrt(x)</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Implement int sqrt(int x).</p>
+<p>Compute and return the square root of x.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<pre><code>Example 1:
+    Input:  0
+    Output: 0
+
+
+Example 2:
+    Input:  3
+    Output: 1
+
+    Explanation:
+    return the largest integer y that y*y &lt;= x. 
+
+Example 3:
+    Input:  4
+    Output: 2
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyayvxonj20r603fglo.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param x: An integer
+     * @return: The sqrt of x
+     */
+   public int sqrt(int x) 
+   {
+        // find the last number which square of it &lt;= x
+        long start = 1, end = x;
+        while (start + 1 &lt; end) 
+        {
+            long mid = start + (end - start) / 2;
+            if (mid * mid &lt;= x) 
+            {
+                start = mid;
+            } 
+            else 
+            {
+                end = mid;
+            }
+        }
+
+        if (end * end &lt;= x) 
+        {
+            return (int) end;
+        }
+        return (int) start;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Sqrt(x). Retrieved from: <a href="https://www.lintcode.com/problem/sqrtx/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sqrtx/description</a></p>
+<p>JiuZhang. (2018). Sqrt(x). Retrieved from: <a href="https://www.jiuzhang.com/solution/sqrt-x/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sqrt-x/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Search in Rotated Sorted Array]]></title>
+      <url>/2019/02/02/Binary%20Search/Search%20in%20Rotated%20Sorted%20Array/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Search in Rotated Sorted Array</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Suppose a sorted array is rotated at some pivot unknown to you beforehand.</p>
+<p>(i.e., 0 1 2 4 5 6 7 might become 4 5 6 7 0 1 2).</p>
+<p>You are given a target value to search. If found in the array return its index, otherwise return -1.</p>
+<p>You may assume no duplicate exists in the array.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>For [4, 5, 1, 2, 3] and target=1, return 2.</p>
+<p>For [4, 5, 1, 2, 3] and target=0, return -1.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty7x6f61j20pg0fu0tf.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param A: an integer rotated sorted array
+     * @param target: an integer to be searched
+     * @return: an integer
+     */
+    public int search(int[] A, int target) 
+    {
+        // check the corner case
+        if (A == null || A.length == 0) 
+        {
+            return -1;
+        }
+
+        int start = 0;
+        int end = A.length - 1;
+        int mid;
+
+        while (start + 1 &lt; end) 
+        {
+            mid = start + (end - start) / 2;
+            if (A[mid] == target) 
+            {
+                return mid;
+            }
+            if (A[start] &lt; A[mid]) 
+            {
+                // situation 1, red line
+                if (A[start] &lt;= target &amp;&amp; target &lt;= A[mid]) 
+                {
+                    end = mid;
+                } 
+                else 
+                {
+                    start = mid;
+                }
+            } 
+            else 
+            {
+                // situation 2, purple line
+                if (A[mid] &lt;= target &amp;&amp; target &lt;= A[end]) 
+                {
+                    start = mid;
+                } 
+                else 
+                {
+                    end = mid;
+                }
+            }
+        } // while
+
+        if (A[start] == target) 
+        {
+            return start;
+        }
+        if (A[end] == target) 
+        {
+            return end;
+        }
+        return -1;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Search in Rotated Sorted Array. Retrieved from: <a href="https://www.lintcode.com/problem/search-in-rotated-sorted-array/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/search-in-rotated-sorted-array/description</a></p>
+<p>JiuZhang. (2018). Search in Rotated Sorted Array. Retrieved from: <a href="https://www.jiuzhang.com/solution/search-in-rotated-sorted-array/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/search-in-rotated-sorted-array/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Find Minimum in Rotated Sorted Array]]></title>
+      <url>/2019/02/02/Binary%20Search/Find%20Minimum%20in%20Rotated%20Sorted%20Array/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Find Minimum in Rotated Sorted Array</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Suppose a sorted array is rotated at some pivot unknown to you beforehand.</p>
+<p>(i.e., 0 1 2 4 5 6 7 might become 4 5 6 7 0 1 2).</p>
+<p>Find the minimum element.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given [4, 5, 6, 7, 0, 1, 2] return 0</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txye0jlkj20qw0chq3i.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: a rotated sorted array
+     * @return: the minimum number in the array
+     */
+    public int findMin(int[] nums) 
+    {
+        if (nums == null || nums.length == 0) 
+        {
+            return -1;
+        }
+
+        int start = 0, end = nums.length - 1;
+        int target = nums[nums.length - 1];
+
+        // find the first element &lt;= target
+        while (start + 1 &lt; end) 
+        {
+            int mid = start + (end - start) / 2;
+            if (nums[mid] &lt;= target)  //比target 小就往左边移动
+            {
+                end = mid;
+            } 
+            else  //比target大就往右边移动
+            {
+                start = mid;
+            }
+        }
+        if (nums[start] &lt;= target) 
+        {
+            return nums[start];
+        } 
+        else 
+        {
+            return nums[end];
+        }
+    }
+}
+</code></pre><p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Find Minimum in Rotated Sorted Array II</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Suppose a sorted array is rotated at some pivot unknown to you beforehand.</p>
+<p>(i.e., 0 1 2 4 5 6 7 might become 4 5 6 7 0 1 2).</p>
+<p>Find the minimum element.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given [4,4,5,6,7,0,1,2] return 0.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txzp6caxj20qo04pq37.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: a rotated sorted array
+     * @return: the minimum number in the array
+     */
+    public int findMin(int[] nums) 
+    {
+        if (nums == null || nums.length == 0) 
+        {
+            return -1;
+        }
+
+        int start = 0, end = nums.length - 1;
+        while (start + 1 &lt; end) 
+        {
+            int mid = start + (end - start) / 2;
+            if (nums[mid] == nums[end]) 
+            {
+                // if mid equals to end, that means it&#39;s fine to remove end
+                // the smallest element won&#39;t be removed
+                end--;
+            } 
+            else if (nums[mid] &lt; nums[end]) 
+            {
+                end = mid;   // of course you can merge == &amp; &lt;              
+            } 
+            else 
+            {
+                start = mid;  // or start = mid + 1
+            }
+        }
+
+        if (nums[start] &lt;= nums[end]) 
+        {
+            return nums[start];
+        }
+        return nums[end];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Find Minimum in Rotated Sorted ArrayI-II. Retrieved from: <a href="https://www.lintcode.com/problem/find-minimum-in-rotated-sorted-array-ii/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/find-minimum-in-rotated-sorted-array-ii/description</a></p>
+<p>JiuZhang. (2018). Find Minimum in Rotated Sorted ArrayI-II. Retrieved from: <a href="https://www.jiuzhang.com/solution/find-minimum-in-rotated-sorted-array/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/find-minimum-in-rotated-sorted-array/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Search Insert Position]]></title>
       <url>/2019/02/02/Binary%20Search/Search%20Insert%20Position/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Search Insert Position</strong></font><br></p>
@@ -1668,6 +4157,8 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
 
 <p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
 <p>You may assume NO duplicates in the array.</p>
+<p>给定一个排序数组和一个目标值，如果在数组中找到目标值则返回索引。如果没有，返回到它将会被按顺序插入的位置。</p>
+<p>你可以假设在数组中无重复元素。</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>[1,3,5,6], 5 → 2</p>
@@ -1676,7 +4167,7 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
 <p>[1,3,5,6], 0 → 0</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/S4ErGE8.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty9gj2f1j20qs0370sv.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -1751,8 +4242,9 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
 <p>This matrix has the following properties:</p>
 <p>Integers in each row are sorted from left to right.</p>
 <p>The first integer of each row is greater than the last integer of the previous row.</p>
-<p>写出一个高效的算法来搜索 m × n矩阵中的值。</p>
-<p>这个矩阵具有以下特性：<br>每行中的整数从左到右是排序的。<br>每行的第一个数大于上一行的最后一个整数。</p>
+<blockquote>
+<p>写出一个高效的算法来搜索 m × n矩阵中的值。<br>这个矩阵具有以下特性：<br>每行中的整数从左到右是排序的。<br>每行的第一个数大于上一行的最后一个整数。</p>
+</blockquote>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Example 1:</p>
@@ -1771,7 +4263,12 @@ Output: true
 
 Explanation: 
 return true if included.
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font><br><br><font color="#000000" size="3.5" face="华文楷体"><br>这个矩形是一个非常有规律的矩形，第二列的数的最小值要比第一列数的最大值大，所以阶梯思路很容易，先把对应的行找出来，再把那一行的所对应的数找出来即可。<br></font><br><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<blockquote>
+<p>这个矩形是一个非常有规律的矩形，第二列的数的最小值要比第一列数的最大值大，所以阶梯思路很容易，先把对应的行找出来，再把那一行的所对应的数找出来即可。</p>
+</blockquote>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
     /*
@@ -1878,7 +4375,12 @@ return true if included.
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
 <p>Find any position of a target number in a sorted array. Return -1 if target does not exist.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+<p>在一个排序数组中找一个数，返回该数出现的任意位置，如果不存在，返回-1</p>
+<pre><code>样例:给出数组 [1, 2, 2, 4, 5, 5].
+对于 target = 2, 返回 1 或者 2.
+对于 target = 5, 返回 4 或者 5.
+对于 target = 6, 返回 -1.
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Example 1:</p>
 <pre><code>Input: nums = [1,2,2,4,5,5], target = 2
@@ -1888,13 +4390,16 @@ Output: 1 or 2
 Output: -1
 </code></pre><p><br><font color="#002060" size="6" face="Calibri"><strong>Question：First Position of Target</strong></font><br></p>
 <p>For a given sorted array (ascending order) and a target number, find the first index of this number in O(log n) time complexity.<br>If the target number does not exist in the array, return -1.</p>
-<p>给定一个排序的整数数组（升序）和一个要查找的整数target，用O(logn)的时间查找到target第一次出现的下标（从0开始），如果target不存在于数组中，返回-1。<br>样例：(寻找第一个三的索引)<br>在数组 [1, 2, 3, 3, 4, 5, 10] 中二分查找3，返回2。</p>
+<p>给定一个排序的整数数组（升序）和一个要查找的整数target，用O(logn)的时间查找到target第一次出现的下标（从0开始），如果target不存在于数组中，返回-1。</p>
+<p>样例：(寻找第一个三的索引)</p>
+<p>在数组 [1, 2, 3, 3, 4, 5, 10] 中二分查找3，返回2。</p>
 <p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Last Position of Target</strong></font><br></p>
-<p>样例：(寻找最后一个三的索引)<br>在数组 [1, 2, 3, 3, 4, 5, 10] 中二分查找3，返回3。</p>
+<p>样例：(寻找最后一个三的索引)</p>
+<p>在数组 [1, 2, 3, 3, 4, 5, 10] 中二分查找3，返回3。</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/pwSsW8m.png" alt=""></p>
-<p><img src="https://i.imgur.com/jZtsbm6.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txhvdnr1j20qr07lwf2.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txty1m1ij21ww2pg48d.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
 <p>LintCode. (2018). Balanced Binary Tree. Retrieved from: <a href="https://www.lintcode.com/problem/classical-binary-search/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/classical-binary-search/description</a></p>
@@ -1903,6 +4408,100 @@ Output: -1
         <categories>
             
             <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Binary Tree Level Order Traversal]]></title>
+      <url>/2019/02/01/Binary%20Tree/Binary%20Tree%20Level%20Order%20Traversal/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Tree Level Order Traversal</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a binary tree, return the level order traversal of its nodes’ values. (ie, from left to right, level by level).</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given binary tree {3,9,20,#,#,15,7},</p>
+<pre><code>    3
+   / \
+  9  20
+    /  \
+   15   7
+</code></pre><p>return its level order traversal as:</p>
+<pre><code>[
+  [3],
+  [9,20],
+  [15,7]
+]
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Challenge 1: Using only 1 queue to implement it.</p>
+<p>Challenge 2: Use BFS algorithm to do it.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>    /**
+ * Definition of TreeNode:
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left, right;
+ *     public TreeNode(int val) {
+ *         this.val = val;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ */
+
+//宽度优先搜索算法
+
+// version 1: BFS
+public class Solution 
+{
+    public List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) 
+    {
+        List result = new ArrayList();
+
+        if (root == null) 
+        {
+            return result;
+        }
+
+        Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
+        queue.offer(root);
+
+        while (!queue.isEmpty()) 
+        {
+            ArrayList&lt;Integer&gt; currentlevel = new ArrayList&lt;Integer&gt;();
+            int size = queue.size(); //取一下当前队列的Size
+            //for (int i = 0; i &lt; queue.size(); i++)  //如果酱紫写的话queue.size会变的
+            for (int i = 0; i &lt; size; i++) //然后遍历
+            {
+                TreeNode head = queue.poll();
+                currentlevel.add(head.val);
+                if (head.left != null) 
+                {
+                    queue.offer(head.left);
+                }
+                if (head.right != null) 
+                {
+                    queue.offer(head.right);
+                }
+            }
+            result.add(currentlevel);
+        }
+        return result;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Binary Tree Level Order Traversal. Retrieved from: <a href="https://www.lintcode.com/problem/binary-tree-level-order-traversal/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-tree-level-order-traversal/description</a></p>
+<p>JiuZhang. (2018). Binary Tree Level Order Traversal. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-tree-level-order-traversal/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-tree-level-order-traversal/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Tree </category>
             
         </categories>
         
@@ -1919,8 +4518,8 @@ Output: -1
 <p>给定一棵具有不同节点值的二叉查找树，删除树中与给定值相同的节点。如果树中没有相同值的节点，就不做任何处理。你应该保证处理之后的树仍是二叉查找树。</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
-<p><img src="https://i.imgur.com/9J6Wmng.png" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font><br><img src="https://i.imgur.com/IpsljWu.png" alt=""><br><br><img src="https://i.imgur.com/3DR9BfZ.jpg" alt=""><br><img src="https://i.imgur.com/0zXCADE.jpg" alt=""><br><br><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyscel9jj20ot0553yg.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyskyadoj20qx0mfgo6.jpg" alt=""><br><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tysulzy7j21ww2pgn69.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyt40vt7j21wv2jvgwl.jpg" alt=""><br><br><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
 <p>LintCode. (2018). Remove Node in Binary Search Tree. Retrieved from: <a href="https://www.lintcode.com/problem/remove-node-in-binary-search-tree/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/remove-node-in-binary-search-tree/description</a></p>
 <p>JiuZhang. (2018). Remove Node in Binary Search Tree. Retrieved from: <a href="https://www.jiuzhang.com/solution/remove-node-in-binary-search-tree/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/remove-node-in-binary-search-tree/</a></p>
@@ -1965,7 +4564,14 @@ Example 2:
     1   4   --&gt;   1   4
        /             / \ 
       3             3   6
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font><br><br><font color="#000000" size="3.5" face="华文楷体"><br>利用递归游走的方法<br><br>当前 插入值比当前Root大就 去右边<br><br>当前 插入值比当前Root小就 去左边<br></font><br><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<blockquote>
+<p>利用递归游走的方法</p>
+<p>当前 插入值比当前Root大就 去右边 </p>
+<p>当前 插入值比当前Root小就 去左边</p>
+</blockquote>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
  * Definition of TreeNode:
@@ -2036,7 +4642,13 @@ public class Solution {
   8   22
  / \
 4   12
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font><br><br><font color="#000000" size="3.5" face="华文楷体"><br>利用Inorder的递归行走法来遍历整个二叉树，遇到符合 K1 &lt; 值 &lt; K2 的数就存起来</font><br><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<blockquote>
+<font color="#000000" size="3.5" face="华文楷体"><br>利用Inorder的递归行走法来遍历整个二叉树，遇到符合 K1 &lt; 值 &lt; K2 的数就存起来</font>
+
+</blockquote>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
  * Definition of TreeNode:
@@ -2084,6 +4696,123 @@ public class Solution {
 
 <p>LintCode. (2018). Search Range in Binary Search Tree. Retrieved from: <a href="https://www.lintcode.com/problem/search-range-in-binary-search-tree/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/search-range-in-binary-search-tree/description</a></p>
 <p>JiuZhang. (2018). Search Range in Binary Search Tree. Retrieved from: <a href="https://www.jiuzhang.com/solution/search-range-in-binary-search-tree/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/search-range-in-binary-search-tree/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Tree </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Binary Search Tree Iterator]]></title>
+      <url>/2019/02/01/Binary%20Tree/Binary%20Search%20Tree%20Iterator/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Binary Search Tree Iterator</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Design an iterator over a binary search tree with the following rules:</p>
+<p>Elements are visited in ascending order (i.e. an in-order traversal)</p>
+<p>next() and hasNext() queries run in O(1) time in average.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>For the following binary search tree, in-order traversal by using iterator is [1, 6, 10, 11, 12]</p>
+<pre><code>   10
+ /    \
+1      11
+ \       \
+  6       12    
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Extra memory usage O(h), h is the height of the tree.</p>
+<p>Super Star: Extra memory usage O(1)</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<blockquote>
+<font color="#000000" size="3.5" face="华文楷体"><br>直接就用Inorder的方式 来看下是否升序</font>
+
+</blockquote>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code> /**
+ * Definition of TreeNode:
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left, right;
+ *     public TreeNode(int val) {
+ *         this.val = val;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ * Example of iterate a tree:
+ * BSTIterator iterator = new BSTIterator(root);
+ * while (iterator.hasNext()) {
+ *    TreeNode node = iterator.next();
+ *    do something for node
+ * } 
+ */
+
+public class BSTIterator 
+{
+    private Stack &lt;TreeNode&gt; stack = new Stack&lt;&gt;(); 
+
+    /*
+    * @param root: The root of binary tree.
+    */public BSTIterator(TreeNode root) 
+    {
+        // do intialization if necessary
+        while (root != null)
+        {
+            stack.push(root);
+            root = root.left;
+        }
+    }
+
+    /*
+     * @return: True if there has next node, or false
+     */
+    public boolean hasNext() 
+    {
+        // write your code here
+        return !stack.isEmpty();
+    }
+
+    /*
+     * @return: return next node
+     */
+    public TreeNode next() 
+    {
+        // write your code here
+        TreeNode curIndex = stack.peek();
+        TreeNode node = curIndex;
+
+        if (node.right == null)
+        {
+            node = stack.pop();
+            while (!stack.isEmpty() &amp;&amp; stack.peek().right == node)
+            {
+                node = stack.pop();
+            }
+        }
+        else 
+        {
+            node = node.right;
+            while (node != null)
+            {
+                stack.push(node);
+                node = node.left;
+            }
+        }
+
+        return curIndex;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Binary Search Tree Iterator. Retrieved from: <a href="https://www.lintcode.com/problem/binary-search-tree-iterator/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/binary-search-tree-iterator/description</a></p>
+<p>JiuZhang. (2018). Binary Search Tree Iterator. Retrieved from: <a href="https://www.jiuzhang.com/solution/binary-search-tree-iterator/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/binary-search-tree-iterator/</a></p>
 ]]></content>
       
         <categories>
@@ -2408,7 +5137,7 @@ Example  3:
 
     Explanation:
     This is not a balanced tree. 
-    The height of node 1&apos;s right sub-tree is 2 but left sub-tree is 0.
+    The height of node 1&#39;s right sub-tree is 2 but left sub-tree is 0.
           1  
            \                
            2                
@@ -2507,6 +5236,97 @@ public class Solution
 
 <p>LintCode. (2018). Balanced Binary Tree. Retrieved from: <a href="https://www.lintcode.com/problem/balanced-binary-tree/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/balanced-binary-tree/description</a></p>
 <p>JiuZhang. (2018). Balanced Binary Tree. Retrieved from: <a href="https://www.jiuzhang.com/solution/balanced-binary-tree/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/balanced-binary-tree/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Tree </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Minimum Depth of Binary Tree]]></title>
+      <url>/2019/02/01/Binary%20Tree/Minimum%20Depth%20of%20Binary%20Tree/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Depth of Binary Tree</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a binary tree, find its minimum depth.</p>
+<p>The minimum depth is the number of nodes along the shortest path from the root node down to the nearest leaf node.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<pre><code>Example 1:
+Input: {}
+Output: 0
+
+Example 2:
+    Input:  {1,#,2,3}
+    Output: 3
+
+    Explanation:
+    1
+     \ 
+      2
+     /
+    3    
+
+Example 3:
+    Input:  {1,2,3,#,#4,5}
+    Output: 2
+
+    Explanation: 
+      1
+     / \ 
+    2   3
+       / \
+      4   5  
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>    /**
+ * Definition of TreeNode:
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left, right;
+ *     public TreeNode(int val) {
+ *         this.val = val;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ */
+
+public class Solution 
+{
+public int minDepth(TreeNode root) 
+{
+    //Check the Corner Case 
+        if (root == null) 
+        {
+            return 0;
+        }
+        return getMin(root);
+    }
+
+public int getMin(TreeNode root)
+{
+        if (root == null) 
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        if (root.left == null &amp;&amp; root.right == null) 
+        {
+            return 1;
+        }
+        //最后通过对比 把左右子数的最小值找出来  + Root自身
+        return Math.min(getMin(root.left), getMin(root.right)) + 1;  
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Minimum Depth of Binary Tree. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-depth-of-binary-tree/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-depth-of-binary-tree/description</a></p>
+<p>JiuZhang. (2018). Minimum Depth of Binary Tree. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-depth-of-binary-tree/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-depth-of-binary-tree/</a></p>
 ]]></content>
       
         <categories>
@@ -2637,11 +5457,11 @@ public class Solution
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Given binary tree {1,#,2,3},</p>
-<pre><code>1
- \
-  2
- /
-3
+<pre><code>   1
+    \
+     2
+    /
+   3
 </code></pre><p>return [3,2,1].</p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding - Divide &amp; Conquer</strong></font>
 
@@ -2718,7 +5538,7 @@ return [1,2,4,5,3].
 <p>Can you do it without recursion?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/DQTbskB.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tymtzdz8j20jp0ewq7o.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
 
 <pre><code>    /**
@@ -2841,18 +5661,18 @@ public class Solution {
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Given binary tree {1,#,2,3},</p>
-<pre><code>1
- \
-  2
- /
-3
+<pre><code>   1
+    \
+     2
+    /
+   3
 </code></pre><p>return [1,3,2].</p>
 <font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
 
 <p>Can you do it without recursion?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/EqmWe9R.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyj6mugyj20n70ep0y9.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding - Non-Recursion</strong></font>
 
 <pre><code>    /**
@@ -2945,7 +5765,7 @@ For numbers coming list: [2, 20, 100], return [2, 2, 20].
 <p>Total run time in O(nlogn).</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/qkvWEC8.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tywy5gyaj20oa05i3yu.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding1</strong></font>
 
 <pre><code>public class Solution {
@@ -3024,6 +5844,70 @@ For numbers coming list: [2, 20, 100], return [2, 2, 20].
     </entry>
     
     <entry>
+      <title><![CDATA[Largest Rectangle in Histogram]]></title>
+      <url>/2019/01/27/Data%20Structure/Largest%20Rectangle%20in%20Histogram/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Largest Rectangle in Histogram</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given n non-negative integers representing the histogram’s bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.</p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyztevmzj205805o0it.jpg" alt=""></p>
+<p>Above is a histogram where width of each bar is 1, given height = [2,1,5,6,2,3].</p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tyzy9fsqj205805ogld.jpg" alt=""></p>
+<p>The largest rectangle is shown in the shaded area, which has area = 10 unit.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given height = [2,1,5,6,2,3],</p>
+<p>return 10.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz03nladj20re098t9n.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param height: A list of integer
+     * @return: The area of largest rectangle in the histogram
+     */
+    public int largestRectangleArea(int[] height) 
+    {
+        if (height == null || height.length == 0) 
+        {
+            return 0;
+        }
+
+        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+        int max = 0;
+        for (int i = 0; i &lt;= height.length; i++) 
+        {
+            int curt = (i == height.length) ? -1 : height[i];
+            while (!stack.isEmpty() &amp;&amp; curt &lt;= height[stack.peek()])   
+            {
+                int h = height[stack.pop()];   //当前长方形的长度
+                int w = stack.isEmpty() ? i : i - stack.peek() - 1;  //左右两边最小值，所形成的面积
+                max = Math.max(max, h * w);
+            }
+            stack.push(i);
+        }
+
+        return max;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Largest Rectangle in Histogram. Retrieved from: <a href="https://www.lintcode.com/problem/largest-rectangle-in-histogram/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/largest-rectangle-in-histogram/description</a></p>
+<p>JiuZhang. (2018). Largest Rectangle in Histogram. Retrieved from: <a href="https://www.jiuzhang.com/solution/largest-rectangle-in-histogram/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/largest-rectangle-in-histogram/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Data Structure </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Min Stack]]></title>
       <url>/2019/01/27/Data%20Structure/Min%20Stack/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Min Stack</strong></font><br></p>
@@ -3042,7 +5926,7 @@ push(1)
 min()   // return 1
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/O4U2Jip.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz27iyckj20t404at8z.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding1</strong></font>
 
 <pre><code>public class MinStack {
@@ -3364,7 +6248,7 @@ isEmpty()
 <p>Can you do it in time complexity O(n) ?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/srmaBVI.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzj155atj20st05h0tb.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
@@ -3637,7 +6521,7 @@ Return
 <p>Can you solve it without using extra space?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/1pIaLkA.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzvh0aiqj20rt0eh0th.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
@@ -3703,7 +6587,7 @@ public class Solution {
 <p>Given 1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5, return 1-&gt;2-&gt;5.<br>Given 1-&gt;1-&gt;1-&gt;2-&gt;3, return 2-&gt;3.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/jayw04d.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzy0nweyj20sr0cg3zp.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
@@ -3791,7 +6675,7 @@ public class Solution {
 </code></pre><p>return -1-&gt;2-&gt;4-&gt;null.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/kuj4fNQ.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzw6vtjtj20sm089aa8.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding - Divide &amp; Conquer  ( NlogK )</strong></font>
 
 <pre><code>    /**
@@ -4023,7 +6907,7 @@ public class Solution {
 <font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
 
 <p>Could you solve it with O(1) space?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking HashMap Version</strong></font><br><img src="https://i.imgur.com/xibMPVs.png" alt=""><br><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking HashMap Version</strong></font><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzkl7cfaj20si0dj0tn.jpg" alt=""><br><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>    /**
  * Definition for singly-linked list with a random pointer.
@@ -4079,7 +6963,7 @@ public class Solution {
         return dummy.next;
     }
 }
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking No HashMap Version</strong></font><br><img src="https://i.imgur.com/YVLg8UV.png" alt=""><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking No HashMap Version</strong></font><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzlf778rj20mv049wen.jpg" alt=""><br><br><font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
  * Definition for singly-linked list with a random pointer.
@@ -4256,7 +7140,7 @@ public class Solution {
 <p>Reverse it in-place and in one-pass</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/0D7uu8C.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u025k5ypj20pr09iq39.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
@@ -4438,7 +7322,7 @@ public class Solution {
 <p>Reverse it in-place and in one-pass</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="https://i.imgur.com/pZVDbgt.png" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u02y61wkj20uc0crq3t.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>/**
@@ -4482,6 +7366,27 @@ public class Solution {
         <categories>
             
             <category> LinkedList </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[移动泛娱乐直播]]></title>
+      <url>/2015/08/04/%E4%BA%A7%E5%93%81%E7%AD%96%E5%88%92/%E7%A7%BB%E5%8A%A8%E6%B3%9B%E5%A8%B1%E4%B9%90%E7%9B%B4%E6%92%AD/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>移动泛娱乐直播</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<blockquote>
+<p>翻电脑资料的时候，找到了2年前找产品工作的策划作品，嗯。。。 今天看了看还是顶认真的,学Axure 下载各种直播App, 一张一张图拼接找资料，各种资料搜索折腾 不过真没想到，后来180度翻转做了游戏开发，今天就把旧账翻出来,翻炒一下，post 在blog上吧 </p>
+</blockquote>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nruj6wj21ww2pgtkp.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3ntrkc6j21ww2pg7ga.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o1cqitj21ww2pge19.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o1jg4fj21ww2pgke1.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3ns500rj21ww2pgamb.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o3pb6lj21ww2pgwui.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nr5pavj21ww2pgdry.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o3vgm8j21ww2pgwu8.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o5cvb8j21ww2pg7km.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o4vn9oj21ww2pgndb.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o5sbv0j21ww2pg17r.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nth8atj21ww2pgdqz.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nuh97bj21ww2pgn6q.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nvevp9j21ww2pg48a.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3ob8i51j21ww2pgapu.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o7k79fj21ww2pgtod.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nvgzipj21ww2pg15u.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o8oofsj21ww2pgwvz.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o8doipj21ww2pgkao.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nypplhj21ww2pgwrx.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o9s2vbj21ww2pg4e9.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nw9mvnj21ww2pgk0i.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3ob6tk5j21ww2pgk7i.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3obt7jhj21ww2pg7ly.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3ny8rf1j21ww2pg4ar.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3oe99zsj21ww2pgqe4.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3nsxg15j21ww2pg157.jpg" alt=""><br><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1v3o08cdrj21ww2pgdwa.jpg" alt=""></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 产品策划 </category>
             
         </categories>
         
