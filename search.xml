@@ -1190,69 +1190,6 @@ false
     </entry>
     
     <entry>
-      <title><![CDATA[Distinct Subsequences]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Distinct%20Subsequences/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Distinct Subsequences</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a string S and a string T, count the number of distinct subsequences of S which equals T.</p>
-<p>A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, “ACE” is a subsequence of “ABCDE” while “AEC” is not).</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given S = “rabbbit”, T = “rabbit”, return 3.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>Do it in O(n2) time and O(n) memory.</p>
-<p>O(n2) memory is also acceptable if you do not know how to optimize memory.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz755h95j20p309t3yx.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    public int numDistinct(String S, String T) 
-    {
-        if (S == null || T == null) 
-        {
-            return 0;
-        }
-
-        int[][] nums = new int[S.length() + 1][T.length() + 1];
-
-        for (int i = 0; i &lt;= S.length(); i++) 
-        {
-            nums[i][0] = 1;
-        }
-        for (int i = 1; i &lt;= S.length(); i++) 
-        {
-            for (int j = 1; j &lt;= T.length(); j++) 
-            {
-                nums[i][j] = nums[i - 1][j];
-                if (S.charAt(i - 1) == T.charAt(j - 1)) 
-                {
-                    nums[i][j] += nums[i - 1][j - 1];
-                }
-            }
-        }
-        return nums[S.length()][T.length()];
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.lintcode.com/problem/distinct-subsequences/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/distinct-subsequences/description</a></p>
-<p>JiuZhang. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.jiuzhang.com/solution/distinct-subsequences/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/distinct-subsequences/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Dynamic Programming </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Climbing Stairs]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Climbing%20Stairs/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Climbing Stairs</strong></font><br></p>
@@ -1310,6 +1247,69 @@ only 1 way.
 
 <p>LintCode. (2018). Climbing Stairs. Retrieved from: <a href="https://www.lintcode.com/problem/climbing-stairs/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/climbing-stairs/description</a></p>
 <p>JiuZhang. (2018). Climbing Stairs. Retrieved from: <a href="https://www.jiuzhang.com/solution/climbing-stairs/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/climbing-stairs/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Distinct Subsequences]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Distinct%20Subsequences/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Distinct Subsequences</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string S and a string T, count the number of distinct subsequences of S which equals T.</p>
+<p>A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, “ACE” is a subsequence of “ABCDE” while “AEC” is not).</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given S = “rabbbit”, T = “rabbit”, return 3.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Do it in O(n2) time and O(n) memory.</p>
+<p>O(n2) memory is also acceptable if you do not know how to optimize memory.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz755h95j20p309t3yx.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    public int numDistinct(String S, String T) 
+    {
+        if (S == null || T == null) 
+        {
+            return 0;
+        }
+
+        int[][] nums = new int[S.length() + 1][T.length() + 1];
+
+        for (int i = 0; i &lt;= S.length(); i++) 
+        {
+            nums[i][0] = 1;
+        }
+        for (int i = 1; i &lt;= S.length(); i++) 
+        {
+            for (int j = 1; j &lt;= T.length(); j++) 
+            {
+                nums[i][j] = nums[i - 1][j];
+                if (S.charAt(i - 1) == T.charAt(j - 1)) 
+                {
+                    nums[i][j] += nums[i - 1][j - 1];
+                }
+            }
+        }
+        return nums[S.length()][T.length()];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.lintcode.com/problem/distinct-subsequences/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/distinct-subsequences/description</a></p>
+<p>JiuZhang. (2018). Distinct Subsequences. Retrieved from: <a href="https://www.jiuzhang.com/solution/distinct-subsequences/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/distinct-subsequences/</a></p>
 ]]></content>
       
         <categories>
@@ -1926,88 +1926,172 @@ public class Solution {
     </entry>
     
     <entry>
-      <title><![CDATA[Longest Substring with At Most K Distinct Characters]]></title>
-      <url>/2019/02/04/Two%20Pointer/Longest%20Substring%20with%20At%20Most%20K%20Distinct%20Characters/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Substring with At Most K Distinct Characters</strong></font><br></p>
+      <title><![CDATA[Minimum Window Substring]]></title>
+      <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
-<p>Given a string S, find the length of the longest substring T that contains at most k distinct characters.</p>
+<p>Given a string source and a string target, find the minimum window in source which will contain all the characters in target.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Clarification</strong></font>
+
+<p>Should the characters in minimum window has the same order in target?</p>
+<p>Not necessary.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Example 1:</p>
-<pre><code>Input: S = &quot;eceba&quot; and k = 3
-Output: 4
-Explanation: T = &quot;eceb&quot;
+<pre><code>Input:
+&quot;&quot;
+&quot;&quot;
+Output:
+&quot;&quot;
 </code></pre><p>Example 2:</p>
-<pre><code>Input: S = &quot;WORLD&quot; and k = 4
-Output: 4
-Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
+<pre><code>Input:
+&quot;ADOBECODEBANC&quot;
+&quot;ABC&quot;
+Output:
+&quot;BANC&quot;
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
 
-<p>O(n) time</p>
+<p>Can you do it in time complexity O(n) ?</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u09rjkkaj20r506g0t4.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0buapzej20r604t0t8.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
-    /**
-     * @param s: A string
-     * @param k: An integer
-     * @return: An integer
-     */
-    public int lengthOfLongestSubstringKDistinct(String s, int k) 
+    int initTargetHash(int []targethash, String Target) 
     {
-        //Check the Corner Case 
-        if (s == null || s.length() == 0 || k == 0) 
+        int targetnum =0 ;
+        for (char ch : Target.toCharArray()) 
         {
-            return 0;
+            targetnum++;  //目标字符串的总个数
+            targethash[ch]++;  //当前字符总出现个数
         }
-        HashMap&lt;Character, Integer&gt; map = new HashMap&lt;Character, Integer&gt;();
-        int strLength = s.length();
-        int i = 0;
-        int j = 0;
-        int ans = Integer.MIN_VALUE;
-
-        for (i = 0; i &lt; strLength; i++)   //固定左指针
+        return targetnum;
+    }
+    //检查当前窗口中的Substring是否包含了目标字符串中全部字符
+    boolean valid(int []sourcehash, int []targethash) 
+    {
+        for(int i = 0; i &lt; 256; i++) 
         {
-            while (j &lt; strLength)   //每次跟新右指针
+            if(targethash[i] &gt; sourcehash[i])    
+                return false;
+        }
+        return true;
+    }
+    public String minWindow(String Source, String Target) 
+    {
+        // queueing the position that matches the char in T
+        int ans = Integer.MAX_VALUE;
+        String minStr = &quot;&quot;;
+
+        int[] sourcehash = new int[256];
+        int[] targethash = new int[256];
+
+        initTargetHash(targethash, Target);
+        int j = 0, i = 0;
+        for(i = 0; i &lt; Source.length(); i++) 
+        {
+            while( !valid(sourcehash, targethash) &amp;&amp; j &lt; Source.length()  ) 
             {
-                char ch_j = s.charAt(j);
-                if (!map.containsKey(ch_j))  //这个元素没有就添加
-                {
-                    if (map.size() == k)  //所包含的元素个数等于目标K
-                    {
-                        break;
-                    }
-                    map.put(ch_j, 1);
-                } 
-                else 
-                {
-                    map.put(ch_j, map.get(ch_j) + 1);
-                }
+                sourcehash[Source.charAt(j)]++;
                 j++;
             }
-            ans = Math.max(ans, j - i);  //每次左右指针移动 都更新区间范围
-            char ch_i = s.charAt(i);
-            if (map.containsKey(ch_i))  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+            if(valid(sourcehash, targethash) ) //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
             {
-                if (map.get(ch_i) - 1 == 0) 
+                if(ans &gt; j - i )   
                 {
-                    map.remove(ch_i);
-                } 
-                else 
-                {
-                    map.put(ch_i, map.get(ch_i) - 1);
+                    ans = Math.min(ans, j - i );
+                    minStr = Source.substring(i, j );
                 }
             }
+            sourcehash[Source.charAt(i)]--;  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
         }
-        return ans;
+        return minStr;
     }
 }
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
-<p>LintCode. (2018). Longest Substring with At Most K Distinct Characters. Retrieved from: <a href="https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description</a></p>
+<p>LintCode. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-window-substring/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-window-substring/description</a></p>
+<p>JiuZhang. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-window-substring/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-window-substring/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Sort Colors]]></title>
+      <url>/2019/02/04/Two%20Pointer/Sort%20Colors/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Colors</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.</p>
+<p>Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given [1, 0, 1, 2], sort it in-place to [0, 1, 1, 2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>A rather straight forward solution is a two-pass algorithm using counting sort.<br>First, iterate the array counting number of 0’s, 1’s, and 2’s, then overwrite array with total number of 0’s, then 1’s and followed by 2’s.</p>
+<p>Could you come up with an one-pass algorithm using only constant space?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0g0q5gtj20rk07vt99.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: A list of integer which is 0, 1 or 2 
+     * @return: nothing
+     */
+   public void sortColors(int[] a) 
+   {
+        //Check the corner case 
+        if (a == null || a.length &lt;= 1) 
+        {
+            return;
+        }
+
+        int left = 0;  //初始化左指针
+        int right = a.length - 1;  //初始化右指针
+        int i = 0;  //准备遍历
+        while (i &lt;= right) 
+        {
+            if (a[i] == 0)  //遇到红球就往左指针扔
+            {
+                swap(a, left, i);
+                left++;
+                i++;
+            } 
+            else if(a[i] == 1) //遇到白球啥都不动
+            {
+                i++;
+            } 
+            else   //遇到蓝球就往右指针扔
+            {
+                swap(a, right, i);
+                right--;
+            }
+        }
+    }
+
+    private void swap(int[] a, int i, int j) 
+    {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp; 
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Sort Colors. Retrieved from: <a href="https://www.lintcode.com/problem/sort-colors/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-colors/description</a></p>
+<p>JiuZhang. (2018). Sort Colors. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-colors/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-colors/</a></p>
 ]]></content>
       
         <categories>
@@ -2104,84 +2188,6 @@ Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
     </entry>
     
     <entry>
-      <title><![CDATA[Sort Colors]]></title>
-      <url>/2019/02/04/Two%20Pointer/Sort%20Colors/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Colors</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.</p>
-<p>Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given [1, 0, 1, 2], sort it in-place to [0, 1, 1, 2].</p>
-<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>A rather straight forward solution is a two-pass algorithm using counting sort.<br>First, iterate the array counting number of 0’s, 1’s, and 2’s, then overwrite array with total number of 0’s, then 1’s and followed by 2’s.</p>
-<p>Could you come up with an one-pass algorithm using only constant space?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0g0q5gtj20rk07vt99.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param nums: A list of integer which is 0, 1 or 2 
-     * @return: nothing
-     */
-   public void sortColors(int[] a) 
-   {
-        //Check the corner case 
-        if (a == null || a.length &lt;= 1) 
-        {
-            return;
-        }
-
-        int left = 0;  //初始化左指针
-        int right = a.length - 1;  //初始化右指针
-        int i = 0;  //准备遍历
-        while (i &lt;= right) 
-        {
-            if (a[i] == 0)  //遇到红球就往左指针扔
-            {
-                swap(a, left, i);
-                left++;
-                i++;
-            } 
-            else if(a[i] == 1) //遇到白球啥都不动
-            {
-                i++;
-            } 
-            else   //遇到蓝球就往右指针扔
-            {
-                swap(a, right, i);
-                right--;
-            }
-        }
-    }
-
-    private void swap(int[] a, int i, int j) 
-    {
-        int temp = a[i];
-        a[i] = a[j];
-        a[j] = temp; 
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Sort Colors. Retrieved from: <a href="https://www.lintcode.com/problem/sort-colors/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-colors/description</a></p>
-<p>JiuZhang. (2018). Sort Colors. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-colors/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-colors/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Two Pointer </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Sort Letters by Case]]></title>
       <url>/2019/02/04/Two%20Pointer/Sort%20Letters%20by%20Case/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Letters by Case</strong></font><br></p>
@@ -2252,94 +2258,88 @@ Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
     </entry>
     
     <entry>
-      <title><![CDATA[Minimum Window Substring]]></title>
-      <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
+      <title><![CDATA[Longest Substring with At Most K Distinct Characters]]></title>
+      <url>/2019/02/04/Two%20Pointer/Longest%20Substring%20with%20At%20Most%20K%20Distinct%20Characters/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Substring with At Most K Distinct Characters</strong></font><br></p>
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
-<p>Given a string source and a string target, find the minimum window in source which will contain all the characters in target.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Clarification</strong></font>
-
-<p>Should the characters in minimum window has the same order in target?</p>
-<p>Not necessary.</p>
+<p>Given a string S, find the length of the longest substring T that contains at most k distinct characters.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
 <p>Example 1:</p>
-<pre><code>Input:
-&quot;&quot;
-&quot;&quot;
-Output:
-&quot;&quot;
+<pre><code>Input: S = &quot;eceba&quot; and k = 3
+Output: 4
+Explanation: T = &quot;eceb&quot;
 </code></pre><p>Example 2:</p>
-<pre><code>Input:
-&quot;ADOBECODEBANC&quot;
-&quot;ABC&quot;
-Output:
-&quot;BANC&quot;
+<pre><code>Input: S = &quot;WORLD&quot; and k = 4
+Output: 4
+Explanation: T = &quot;WORL&quot; or &quot;ORLD&quot;
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
 
-<p>Can you do it in time complexity O(n) ?</p>
+<p>O(n) time</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0buapzej20r604t0t8.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u09rjkkaj20r506g0t4.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
-    int initTargetHash(int []targethash, String Target) 
+    /**
+     * @param s: A string
+     * @param k: An integer
+     * @return: An integer
+     */
+    public int lengthOfLongestSubstringKDistinct(String s, int k) 
     {
-        int targetnum =0 ;
-        for (char ch : Target.toCharArray()) 
+        //Check the Corner Case 
+        if (s == null || s.length() == 0 || k == 0) 
         {
-            targetnum++;  //目标字符串的总个数
-            targethash[ch]++;  //当前字符总出现个数
+            return 0;
         }
-        return targetnum;
-    }
-    //检查当前窗口中的Substring是否包含了目标字符串中全部字符
-    boolean valid(int []sourcehash, int []targethash) 
-    {
-        for(int i = 0; i &lt; 256; i++) 
-        {
-            if(targethash[i] &gt; sourcehash[i])    
-                return false;
-        }
-        return true;
-    }
-    public String minWindow(String Source, String Target) 
-    {
-        // queueing the position that matches the char in T
-        int ans = Integer.MAX_VALUE;
-        String minStr = &quot;&quot;;
+        HashMap&lt;Character, Integer&gt; map = new HashMap&lt;Character, Integer&gt;();
+        int strLength = s.length();
+        int i = 0;
+        int j = 0;
+        int ans = Integer.MIN_VALUE;
 
-        int[] sourcehash = new int[256];
-        int[] targethash = new int[256];
-
-        initTargetHash(targethash, Target);
-        int j = 0, i = 0;
-        for(i = 0; i &lt; Source.length(); i++) 
+        for (i = 0; i &lt; strLength; i++)   //固定左指针
         {
-            while( !valid(sourcehash, targethash) &amp;&amp; j &lt; Source.length()  ) 
+            while (j &lt; strLength)   //每次跟新右指针
             {
-                sourcehash[Source.charAt(j)]++;
+                char ch_j = s.charAt(j);
+                if (!map.containsKey(ch_j))  //这个元素没有就添加
+                {
+                    if (map.size() == k)  //所包含的元素个数等于目标K
+                    {
+                        break;
+                    }
+                    map.put(ch_j, 1);
+                } 
+                else 
+                {
+                    map.put(ch_j, map.get(ch_j) + 1);
+                }
                 j++;
             }
-            if(valid(sourcehash, targethash) ) //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
+            ans = Math.max(ans, j - i);  //每次左右指针移动 都更新区间范围
+            char ch_i = s.charAt(i);
+            if (map.containsKey(ch_i))  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
             {
-                if(ans &gt; j - i )   
+                if (map.get(ch_i) - 1 == 0) 
                 {
-                    ans = Math.min(ans, j - i );
-                    minStr = Source.substring(i, j );
+                    map.remove(ch_i);
+                } 
+                else 
+                {
+                    map.put(ch_i, map.get(ch_i) - 1);
                 }
             }
-            sourcehash[Source.charAt(i)]--;  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
         }
-        return minStr;
+        return ans;
     }
 }
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
-<p>LintCode. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-window-substring/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-window-substring/description</a></p>
-<p>JiuZhang. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-window-substring/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-window-substring/</a></p>
+<p>LintCode. (2018). Longest Substring with At Most K Distinct Characters. Retrieved from: <a href="https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-substring-with-at-most-k-distinct-characters/description</a></p>
 ]]></content>
       
         <categories>
@@ -3341,6 +3341,120 @@ Explanation:
     </entry>
     
     <entry>
+      <title><![CDATA[Total Occurence of Target]]></title>
+      <url>/2019/02/02/Binary%20Search/Total%20Occurence%20of%20Target/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Total Occurence of Target</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a target number and an integer array sorted in ascending order. Find the total number of occurrences of target in the array.</p>
+<p>Example</p>
+<pre><code>Given [1, 3, 3, 4, 5] and target = 3, return 2.
+Given [2, 2, 3, 4, 6] and target = 4, return 1.
+Given [1, 2, 3, 4, 5] and target = 6, return 0.
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tybqa7b1j20r202qq2y.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param A: an integer sorted array
+     * @param target: an integer to be inserted
+     * @return: a list of length 2, [index1, index2]
+     */
+    public int[] totalOccurrence(int[] A, int target) 
+    {
+        //check the corner case 
+        if (A.length == 0)
+        {
+            return 0;
+        }
+
+        //left and right Index 
+        int left; right = 0; 
+
+        //search for left bound
+        int start = 0;
+        int end = A.length - 1;
+        int mid;
+
+        while (start + 1 &lt; end)
+        {
+            mid = start + (end - start) / 2;
+            if (A[mid] == target)
+            {
+                end = mid;
+            }
+            else if (A[mid] &lt; target)
+            {
+                start = mid;
+            }
+            else
+            {
+                end = mid;
+            }
+        }
+
+        if (A[start] == target)
+        {
+            left = start;
+        }
+        else if (A[end] == target)
+        {
+            left = end;
+        }
+        else
+        {
+            return 0;
+        }
+
+        //search for right bound
+        start = 0;
+        end = A.length - 1;
+        while(start + 1 &lt; end)
+        {
+            mid = start + (end - start) / 2;
+            if (A[mid] == target)
+            {
+                start = mid;
+            }
+            else if (A[mid] &lt; target)
+            {
+                start = mid;
+            }
+            else
+            {
+                end = mid;
+            }
+        }
+        if (A[end] == target)
+        {
+            right = end;
+        }
+        else if (A[start] == target)
+        {
+            right = start;
+        }
+        else
+        {
+            return 0;
+        }
+
+        return right - left + 1; 
+    }
+}
+</code></pre>]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Search for a Range]]></title>
       <url>/2019/02/02/Binary%20Search/Search%20for%20a%20Range/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Search for a Range</strong></font><br></p>
@@ -3451,120 +3565,6 @@ Explanation:
 <p>LintCode. (2018). Search for a Range. Retrieved from: <a href="https://www.lintcode.com/problem/search-for-a-range/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/search-for-a-range/description</a></p>
 <p>JiuZhang. (2018). Search for a Range. Retrieved from: <a href="https://www.jiuzhang.com/solution/search-for-a-range/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/search-for-a-range/</a></p>
 ]]></content>
-      
-        <categories>
-            
-            <category> Binary Search </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Total Occurence of Target]]></title>
-      <url>/2019/02/02/Binary%20Search/Total%20Occurence%20of%20Target/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Total Occurence of Target</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a target number and an integer array sorted in ascending order. Find the total number of occurrences of target in the array.</p>
-<p>Example</p>
-<pre><code>Given [1, 3, 3, 4, 5] and target = 3, return 2.
-Given [2, 2, 3, 4, 6] and target = 4, return 1.
-Given [1, 2, 3, 4, 5] and target = 6, return 0.
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tybqa7b1j20r202qq2y.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param A: an integer sorted array
-     * @param target: an integer to be inserted
-     * @return: a list of length 2, [index1, index2]
-     */
-    public int[] totalOccurrence(int[] A, int target) 
-    {
-        //check the corner case 
-        if (A.length == 0)
-        {
-            return 0;
-        }
-
-        //left and right Index 
-        int left; right = 0; 
-
-        //search for left bound
-        int start = 0;
-        int end = A.length - 1;
-        int mid;
-
-        while (start + 1 &lt; end)
-        {
-            mid = start + (end - start) / 2;
-            if (A[mid] == target)
-            {
-                end = mid;
-            }
-            else if (A[mid] &lt; target)
-            {
-                start = mid;
-            }
-            else
-            {
-                end = mid;
-            }
-        }
-
-        if (A[start] == target)
-        {
-            left = start;
-        }
-        else if (A[end] == target)
-        {
-            left = end;
-        }
-        else
-        {
-            return 0;
-        }
-
-        //search for right bound
-        start = 0;
-        end = A.length - 1;
-        while(start + 1 &lt; end)
-        {
-            mid = start + (end - start) / 2;
-            if (A[mid] == target)
-            {
-                start = mid;
-            }
-            else if (A[mid] &lt; target)
-            {
-                start = mid;
-            }
-            else
-            {
-                end = mid;
-            }
-        }
-        if (A[end] == target)
-        {
-            right = end;
-        }
-        else if (A[start] == target)
-        {
-            right = start;
-        }
-        else
-        {
-            return 0;
-        }
-
-        return right - left + 1; 
-    }
-}
-</code></pre>]]></content>
       
         <categories>
             
@@ -5697,17 +5697,18 @@ public class Solution {
         Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
         ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
 
-        while (root != null) 
+        while (root != null) //先把树的左节点加入到栈里面
         {
             stack.push(root);
             root = root.left;
         }
 
-        while (!stack.isEmpty()) 
+        while (!stack.isEmpty()) //加入到栈当中, 再逐个分析
         {
             TreeNode node = stack.peek();
             result.add(node.val);
 
+            //分为两种情况, 当前节点的右节点为空的时候
             if (node.right == null) 
             {
                 node = stack.pop();
@@ -5716,7 +5717,7 @@ public class Solution {
                     node = stack.pop();
                 }
             } 
-            else 
+            else //当前节点的的右节点不为空的时候
             {
                 node = node.right;
                 while (node != null) 

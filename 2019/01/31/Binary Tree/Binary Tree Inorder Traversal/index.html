@@ -234,7 +234,7 @@
 
     
         <meta property="article:published_time" content="Thu Jan 31 2019 20:45:11 GMT+0800">
-        <meta property="article:modified_time" content="Sun Apr 07 2019 12:29:33 GMT+0800">
+        <meta property="article:modified_time" content="Fri Apr 19 2019 13:53:41 GMT+0800">
     
 
     <!-- The Twitter Card protocol -->
@@ -257,7 +257,7 @@
     "mainEntityOfPage": "http://yoursite.com/2019/01/31/Binary Tree/Binary Tree Inorder Traversal/index.html",
     "headline": "Binary Tree Inorder Traversal",
     "datePublished": "Thu Jan 31 2019 20:45:11 GMT+0800",
-    "dateModified": "Sun Apr 07 2019 12:29:33 GMT+0800",
+    "dateModified": "Fri Apr 19 2019 13:53:41 GMT+0800",
     "author": {
         "@type": "Person",
         "name": "preston Chan",
@@ -477,17 +477,18 @@ public class Solution {
         Stack&lt;TreeNode&gt; stack = new Stack&lt;&gt;();
         ArrayList&lt;Integer&gt; result = new ArrayList&lt;&gt;();
 
-        while (root != null) 
+        while (root != null) //先把树的左节点加入到栈里面
         {
             stack.push(root);
             root = root.left;
         }
 
-        while (!stack.isEmpty()) 
+        while (!stack.isEmpty()) //加入到栈当中, 再逐个分析
         {
             TreeNode node = stack.peek();
             result.add(node.val);
 
+            //分为两种情况, 当前节点的右节点为空的时候
             if (node.right == null) 
             {
                 node = stack.pop();
@@ -496,7 +497,7 @@ public class Solution {
                     node = stack.pop();
                 }
             } 
-            else 
+            else //当前节点的的右节点不为空的时候
             {
                 node = node.right;
                 while (node != null) 
