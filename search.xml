@@ -3,6 +3,18 @@
   
     
     <entry>
+      <title><![CDATA[如 图片看不到，暂且请科学上网]]></title>
+      <url>/2019/04/24/%E5%9B%BE%E5%BA%8A%E7%9C%8B%E4%B8%8D%E5%88%B0%EF%BC%8C%E6%9A%82%E4%B8%94%E8%AF%B7%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/</url>
+      <content type="html"><![CDATA[<p>图床可真是的令人头疼的问题，之前放在七牛云上，结果七牛云的测试域名回收了，导致图片全看不见，现在选用的微博作为图床</p>
+<p>这几天发现有时候看到图片，有时候看不到，连访问本地Blog都看不到，可能跟新浪的服务器问题</p>
+<p>几轮测试后，发现如果图床看不到的时候，<font color="#002060" size="3" face="Calibri"><strong>科学上网可以解决</strong></font></p>
+<p>域名备案处处受到阻碍, 如果出现频繁的话。 又要考虑换图床产品啦  o(╥﹏╥)o</p>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Object Pool]]></title>
       <url>/2019/04/08/Game%20Programming%20Patterns/Object_Pool/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Object Pool</strong></font><br></p>
@@ -623,89 +635,6 @@ return GameState_Manager
     </entry>
     
     <entry>
-      <title><![CDATA[Word Break]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Word%20Break/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Word Break</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a string s and a dictionary of words dict, determine if s can be break into a space-separated sequence of one or more dictionary words.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given s = “lintcode”, dict = [“lint”, “code”].</p>
-<p>Return true because “lintcode” can be break as “lint code”.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzh7vephj20pg0f8gmj.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /*
-     * @param s: A string
-     * @param dict: A dictionary of words dict
-     * @return: A boolean
-     */
-
-    //获取字典里 最大的单词长度
-    private int getMaxLength(Set&lt;String&gt; dict) 
-    {
-        int maxLength = 0;
-        for (String word : dict) 
-        {
-            maxLength = Math.max(maxLength, word.length());
-        }
-        return maxLength;
-    }
-
-    public boolean wordBreak(String s, Set&lt;String&gt; dict) 
-    {
-    //Check the Corner Case 
-        if (s == null || s.length() == 0) 
-        {
-            return true;
-        }
-
-        int maxLength = getMaxLength(dict);   //取到单词里面的最大长度
-        boolean[] canSegment = new boolean[s.length() + 1];
-
-        canSegment[0] = true;
-        for (int i = 1; i &lt;= s.length(); i++)   //当去遍历的时候 从后往前割
-        {
-            canSegment[i] = false;
-            for (int lastWordLength = 1;
-                     lastWordLength &lt;= maxLength &amp;&amp; lastWordLength &lt;= i;
-                     lastWordLength++) {  //然后去看下 最后割出来的长度为1个呢 2个呢 还是3个呢 还是到达最大长度？
-                if (!canSegment[i - lastWordLength]) 
-                {
-                    continue;
-                }
-                String word = s.substring(i - lastWordLength, i);  //割完之后把 单词取出来
-                if (dict.contains(word))   //在判断一下在不在词典里面  O(L)的时间复杂度
-                {
-                    canSegment[i] = true;
-                    break;
-                }
-            }
-        }
-
-        return canSegment[s.length()];
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Word Break. Retrieved from: <a href="https://www.lintcode.com/problem/word-break/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/word-break/description</a></p>
-<p>JiuZhang. (2018). Word Break. Retrieved from: <a href="https://www.jiuzhang.com/solution/word-break/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/word-break/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Dynamic Programming </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Unique Paths]]></title>
       <url>/2019/02/05/Dynamic%20Programming/Unique%20Paths/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Unique Paths</strong></font><br></p>
@@ -777,6 +706,89 @@ R : Right
 
 <p>LintCode. (2018). Unique Paths. Retrieved from: <a href="https://www.lintcode.com/problem/unique-paths/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/unique-paths/description</a></p>
 <p>JiuZhang. (2018). Unique Paths. Retrieved from: <a href="https://www.jiuzhang.com/solution/unique-paths/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/unique-paths/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Dynamic Programming </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Word Break]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Word%20Break/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Word Break</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string s and a dictionary of words dict, determine if s can be break into a space-separated sequence of one or more dictionary words.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given s = “lintcode”, dict = [“lint”, “code”].</p>
+<p>Return true because “lintcode” can be break as “lint code”.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzh7vephj20pg0f8gmj.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param s: A string
+     * @param dict: A dictionary of words dict
+     * @return: A boolean
+     */
+
+    //获取字典里 最大的单词长度
+    private int getMaxLength(Set&lt;String&gt; dict) 
+    {
+        int maxLength = 0;
+        for (String word : dict) 
+        {
+            maxLength = Math.max(maxLength, word.length());
+        }
+        return maxLength;
+    }
+
+    public boolean wordBreak(String s, Set&lt;String&gt; dict) 
+    {
+    //Check the Corner Case 
+        if (s == null || s.length() == 0) 
+        {
+            return true;
+        }
+
+        int maxLength = getMaxLength(dict);   //取到单词里面的最大长度
+        boolean[] canSegment = new boolean[s.length() + 1];
+
+        canSegment[0] = true;
+        for (int i = 1; i &lt;= s.length(); i++)   //当去遍历的时候 从后往前割
+        {
+            canSegment[i] = false;
+            for (int lastWordLength = 1;
+                     lastWordLength &lt;= maxLength &amp;&amp; lastWordLength &lt;= i;
+                     lastWordLength++) {  //然后去看下 最后割出来的长度为1个呢 2个呢 还是3个呢 还是到达最大长度？
+                if (!canSegment[i - lastWordLength]) 
+                {
+                    continue;
+                }
+                String word = s.substring(i - lastWordLength, i);  //割完之后把 单词取出来
+                if (dict.contains(word))   //在判断一下在不在词典里面  O(L)的时间复杂度
+                {
+                    canSegment[i] = true;
+                    break;
+                }
+            }
+        }
+
+        return canSegment[s.length()];
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Word Break. Retrieved from: <a href="https://www.lintcode.com/problem/word-break/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/word-break/description</a></p>
+<p>JiuZhang. (2018). Word Break. Retrieved from: <a href="https://www.jiuzhang.com/solution/word-break/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/word-break/</a></p>
 ]]></content>
       
         <categories>
@@ -957,54 +969,89 @@ Path is: 1 -&gt; 3 -&gt; 2
     </entry>
     
     <entry>
-      <title><![CDATA[Longest Increasing Subsequence]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Longest%20Increasing%20Subsequence/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Increasing Subsequence</strong></font><br></p>
+      <title><![CDATA[Interleaving String]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Interleaving%20String/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Interleaving String</strong></font><br></p>
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
-<p>Given a sequence of integers, find the longest increasing subsequence (LIS).</p>
-<p>You code should return the length of the LIS.</p>
+<p>Given three strings: s1, s2, s3, determine whether s3 is formed by the interleaving of s1 and s2.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
-<p>For [5, 4, 1, 2, 3], the LIS is [1, 2, 3], return 3</p>
-<p>For [4, 2, 4, 5, 3, 7], the LIS is [2, 4, 5, 7], return 4</p>
+<p>Example 1:</p>
+<pre><code>Input:
+&quot;&quot;
+&quot;&quot;
+&quot;1&quot;
+Output:
+false
+</code></pre><p>Example 2:</p>
+<pre><code>Input:
+&quot;aabcc&quot;
+&quot;dbbca&quot;
+&quot;aadbbcbcac&quot;
+Output:
+true
+</code></pre><p>Example 3:</p>
+<pre><code>Input:
+&quot;aabcc&quot;
+&quot;dbbca&quot;
+&quot;aadbbbaccc&quot;
+Output:
+false
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>O(n2) time or better</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzbc2a9bj20pp0hddgk.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz8zl6wzj20p20c5aav.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
     /**
-     * @param nums: An integer array
-     * @return: The length of LIS (longest increasing subsequence)
+     * @param s1: A string
+     * @param s2: A string
+     * @param s3: A string
+     * @return: Determine whether s3 is formed by interleaving of s1 and s2
      */
-    public int longestIncreasingSubsequence(int[] nums) 
+    public boolean isInterleave(String s1, String s2, String s3) 
     {
-        int []f = new int[nums.length];
-        int max = 0;
-        for (int i = 0; i &lt; nums.length; i++)    //for 所有的点
+        if (s1.length() + s2.length() != s3.length()) 
         {
-            f[i] = 1;  //初始化  自己算作是1
-            for (int j = 0; j &lt; i; j++)      //for每个点 前面的所有j 
+            return false;
+        }
+
+        boolean [][] interleaved = new boolean[s1.length() + 1][s2.length() + 1];
+        interleaved[0][0] = true;
+
+        for (int i = 1; i &lt;= s1.length(); i++) 
+        {
+            if(s3.charAt(i - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][0])
+                interleaved[i][0] = true;
+        }
+
+        for (int j = 1; j &lt;= s2.length(); j++) 
+        {
+            if(s3.charAt(j - 1) == s2.charAt(j - 1) &amp;&amp; interleaved[0][j - 1])
+                interleaved[0][j] = true;
+        }
+
+        for (int i = 1; i &lt;= s1.length(); i++) 
+        {
+            for (int j = 1; j &lt;= s2.length(); j++) 
             {
-                if (nums[j] &lt; nums[i])  //如果当前j所在的阶梯 比 i小 才有戏
-                {
-                    //返回所有lis的最大值
-                    f[i] = f[i] &gt; f[j] + 1 ? f[i] : f[j] + 1;    //有戏了  最长子序列才 +1(然后打擂台算法：找一个当前最大的)
-                }
-            }
-            if (f[i] &gt; max) 
-            {
-                max = f[i];
+                if(((s3.charAt(i + j - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][j]))
+                    || ((s3.charAt(i + j - 1)) == s2.charAt(j - 1) &amp;&amp; interleaved[i][j - 1]))
+                interleaved[i][j] = true;
             }
         }
-        return max;
+
+        return interleaved[s1.length()][s2.length()];
     }
 }
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
-<p>LintCode. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.lintcode.com/problem/longest-increasing-subsequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-increasing-subsequence/description</a></p>
-<p>JiuZhang. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.jiuzhang.com/solution/longest-increasing-subsequence/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/longest-increasing-subsequence/</a></p>
+<p>LintCode. (2018). Interleaving String. Retrieved from: <a href="https://www.lintcode.com/problem/interleaving-string/descriptiondescription" target="_blank" rel="noopener">https://www.lintcode.com/problem/interleaving-string/descriptiondescription</a></p>
+<p>JiuZhang. (2018). Interleaving String. Retrieved from: <a href="https://www.jiuzhang.com/solution/interleaving-string/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/interleaving-string/</a></p>
 ]]></content>
       
         <categories>
@@ -1095,89 +1142,54 @@ Path is: 1 -&gt; 3 -&gt; 2
     </entry>
     
     <entry>
-      <title><![CDATA[Interleaving String]]></title>
-      <url>/2019/02/05/Dynamic%20Programming/Interleaving%20String/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Interleaving String</strong></font><br></p>
+      <title><![CDATA[Longest Increasing Subsequence]]></title>
+      <url>/2019/02/05/Dynamic%20Programming/Longest%20Increasing%20Subsequence/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Longest Increasing Subsequence</strong></font><br></p>
 <font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
 
-<p>Given three strings: s1, s2, s3, determine whether s3 is formed by the interleaving of s1 and s2.</p>
+<p>Given a sequence of integers, find the longest increasing subsequence (LIS).</p>
+<p>You code should return the length of the LIS.</p>
 <font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
 
-<p>Example 1:</p>
-<pre><code>Input:
-&quot;&quot;
-&quot;&quot;
-&quot;1&quot;
-Output:
-false
-</code></pre><p>Example 2:</p>
-<pre><code>Input:
-&quot;aabcc&quot;
-&quot;dbbca&quot;
-&quot;aadbbcbcac&quot;
-Output:
-true
-</code></pre><p>Example 3:</p>
-<pre><code>Input:
-&quot;aabcc&quot;
-&quot;dbbca&quot;
-&quot;aadbbbaccc&quot;
-Output:
-false
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>O(n2) time or better</p>
+<p>For [5, 4, 1, 2, 3], the LIS is [1, 2, 3], return 3</p>
+<p>For [4, 2, 4, 5, 3, 7], the LIS is [2, 4, 5, 7], return 4</p>
 <font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
 
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tz8zl6wzj20p20c5aav.jpg" alt=""></p>
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1tzbc2a9bj20pp0hddgk.jpg" alt=""></p>
 <font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
 
 <pre><code>public class Solution {
     /**
-     * @param s1: A string
-     * @param s2: A string
-     * @param s3: A string
-     * @return: Determine whether s3 is formed by interleaving of s1 and s2
+     * @param nums: An integer array
+     * @return: The length of LIS (longest increasing subsequence)
      */
-    public boolean isInterleave(String s1, String s2, String s3) 
+    public int longestIncreasingSubsequence(int[] nums) 
     {
-        if (s1.length() + s2.length() != s3.length()) 
+        int []f = new int[nums.length];
+        int max = 0;
+        for (int i = 0; i &lt; nums.length; i++)    //for 所有的点
         {
-            return false;
-        }
-
-        boolean [][] interleaved = new boolean[s1.length() + 1][s2.length() + 1];
-        interleaved[0][0] = true;
-
-        for (int i = 1; i &lt;= s1.length(); i++) 
-        {
-            if(s3.charAt(i - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][0])
-                interleaved[i][0] = true;
-        }
-
-        for (int j = 1; j &lt;= s2.length(); j++) 
-        {
-            if(s3.charAt(j - 1) == s2.charAt(j - 1) &amp;&amp; interleaved[0][j - 1])
-                interleaved[0][j] = true;
-        }
-
-        for (int i = 1; i &lt;= s1.length(); i++) 
-        {
-            for (int j = 1; j &lt;= s2.length(); j++) 
+            f[i] = 1;  //初始化  自己算作是1
+            for (int j = 0; j &lt; i; j++)      //for每个点 前面的所有j 
             {
-                if(((s3.charAt(i + j - 1) == s1.charAt(i - 1) &amp;&amp; interleaved[i - 1][j]))
-                    || ((s3.charAt(i + j - 1)) == s2.charAt(j - 1) &amp;&amp; interleaved[i][j - 1]))
-                interleaved[i][j] = true;
+                if (nums[j] &lt; nums[i])  //如果当前j所在的阶梯 比 i小 才有戏
+                {
+                    //返回所有lis的最大值
+                    f[i] = f[i] &gt; f[j] + 1 ? f[i] : f[j] + 1;    //有戏了  最长子序列才 +1(然后打擂台算法：找一个当前最大的)
+                }
+            }
+            if (f[i] &gt; max) 
+            {
+                max = f[i];
             }
         }
-
-        return interleaved[s1.length()][s2.length()];
+        return max;
     }
 }
 </code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
 
-<p>LintCode. (2018). Interleaving String. Retrieved from: <a href="https://www.lintcode.com/problem/interleaving-string/descriptiondescription" target="_blank" rel="noopener">https://www.lintcode.com/problem/interleaving-string/descriptiondescription</a></p>
-<p>JiuZhang. (2018). Interleaving String. Retrieved from: <a href="https://www.jiuzhang.com/solution/interleaving-string/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/interleaving-string/</a></p>
+<p>LintCode. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.lintcode.com/problem/longest-increasing-subsequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/longest-increasing-subsequence/description</a></p>
+<p>JiuZhang. (2018). Longest Increasing Subsequence. Retrieved from: <a href="https://www.jiuzhang.com/solution/longest-increasing-subsequence/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/longest-increasing-subsequence/</a></p>
 ]]></content>
       
         <categories>
@@ -1926,184 +1938,6 @@ public class Solution {
     </entry>
     
     <entry>
-      <title><![CDATA[Minimum Window Substring]]></title>
-      <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given a string source and a string target, find the minimum window in source which will contain all the characters in target.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Clarification</strong></font>
-
-<p>Should the characters in minimum window has the same order in target?</p>
-<p>Not necessary.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Example 1:</p>
-<pre><code>Input:
-&quot;&quot;
-&quot;&quot;
-Output:
-&quot;&quot;
-</code></pre><p>Example 2:</p>
-<pre><code>Input:
-&quot;ADOBECODEBANC&quot;
-&quot;ABC&quot;
-Output:
-&quot;BANC&quot;
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>Can you do it in time complexity O(n) ?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0buapzej20r604t0t8.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    int initTargetHash(int []targethash, String Target) 
-    {
-        int targetnum =0 ;
-        for (char ch : Target.toCharArray()) 
-        {
-            targetnum++;  //目标字符串的总个数
-            targethash[ch]++;  //当前字符总出现个数
-        }
-        return targetnum;
-    }
-    //检查当前窗口中的Substring是否包含了目标字符串中全部字符
-    boolean valid(int []sourcehash, int []targethash) 
-    {
-        for(int i = 0; i &lt; 256; i++) 
-        {
-            if(targethash[i] &gt; sourcehash[i])    
-                return false;
-        }
-        return true;
-    }
-    public String minWindow(String Source, String Target) 
-    {
-        // queueing the position that matches the char in T
-        int ans = Integer.MAX_VALUE;
-        String minStr = &quot;&quot;;
-
-        int[] sourcehash = new int[256];
-        int[] targethash = new int[256];
-
-        initTargetHash(targethash, Target);
-        int j = 0, i = 0;
-        for(i = 0; i &lt; Source.length(); i++) 
-        {
-            while( !valid(sourcehash, targethash) &amp;&amp; j &lt; Source.length()  ) 
-            {
-                sourcehash[Source.charAt(j)]++;
-                j++;
-            }
-            if(valid(sourcehash, targethash) ) //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
-            {
-                if(ans &gt; j - i )   
-                {
-                    ans = Math.min(ans, j - i );
-                    minStr = Source.substring(i, j );
-                }
-            }
-            sourcehash[Source.charAt(i)]--;  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
-        }
-        return minStr;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-window-substring/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-window-substring/description</a></p>
-<p>JiuZhang. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-window-substring/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-window-substring/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Two Pointer </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Sort Colors]]></title>
-      <url>/2019/02/04/Two%20Pointer/Sort%20Colors/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Colors</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.</p>
-<p>Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given [1, 0, 1, 2], sort it in-place to [0, 1, 1, 2].</p>
-<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
-
-<p>A rather straight forward solution is a two-pass algorithm using counting sort.<br>First, iterate the array counting number of 0’s, 1’s, and 2’s, then overwrite array with total number of 0’s, then 1’s and followed by 2’s.</p>
-<p>Could you come up with an one-pass algorithm using only constant space?</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0g0q5gtj20rk07vt99.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param nums: A list of integer which is 0, 1 or 2 
-     * @return: nothing
-     */
-   public void sortColors(int[] a) 
-   {
-        //Check the corner case 
-        if (a == null || a.length &lt;= 1) 
-        {
-            return;
-        }
-
-        int left = 0;  //初始化左指针
-        int right = a.length - 1;  //初始化右指针
-        int i = 0;  //准备遍历
-        while (i &lt;= right) 
-        {
-            if (a[i] == 0)  //遇到红球就往左指针扔
-            {
-                swap(a, left, i);
-                left++;
-                i++;
-            } 
-            else if(a[i] == 1) //遇到白球啥都不动
-            {
-                i++;
-            } 
-            else   //遇到蓝球就往右指针扔
-            {
-                swap(a, right, i);
-                right--;
-            }
-        }
-    }
-
-    private void swap(int[] a, int i, int j) 
-    {
-        int temp = a[i];
-        a[i] = a[j];
-        a[j] = temp; 
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Sort Colors. Retrieved from: <a href="https://www.lintcode.com/problem/sort-colors/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-colors/description</a></p>
-<p>JiuZhang. (2018). Sort Colors. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-colors/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-colors/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Two Pointer </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Valid Palindrome]]></title>
       <url>/2019/02/04/Two%20Pointer/Valid%20Palindrome/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Valid Palindrome</strong></font><br></p>
@@ -2246,6 +2080,184 @@ Output:
 
 <p>LintCode. (2018). Sort Letters by Case. Retrieved from: <a href="https://www.lintcode.com/problem/sort-letters-by-case/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-letters-by-case/description</a></p>
 <p>JiuZhang. (2018). Sort Letters by Case. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-letters-by-case/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-letters-by-case/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Sort Colors]]></title>
+      <url>/2019/02/04/Two%20Pointer/Sort%20Colors/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Sort Colors</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.</p>
+<p>Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given [1, 0, 1, 2], sort it in-place to [0, 1, 1, 2].</p>
+<font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>A rather straight forward solution is a two-pass algorithm using counting sort.<br>First, iterate the array counting number of 0’s, 1’s, and 2’s, then overwrite array with total number of 0’s, then 1’s and followed by 2’s.</p>
+<p>Could you come up with an one-pass algorithm using only constant space?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0g0q5gtj20rk07vt99.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param nums: A list of integer which is 0, 1 or 2 
+     * @return: nothing
+     */
+   public void sortColors(int[] a) 
+   {
+        //Check the corner case 
+        if (a == null || a.length &lt;= 1) 
+        {
+            return;
+        }
+
+        int left = 0;  //初始化左指针
+        int right = a.length - 1;  //初始化右指针
+        int i = 0;  //准备遍历
+        while (i &lt;= right) 
+        {
+            if (a[i] == 0)  //遇到红球就往左指针扔
+            {
+                swap(a, left, i);
+                left++;
+                i++;
+            } 
+            else if(a[i] == 1) //遇到白球啥都不动
+            {
+                i++;
+            } 
+            else   //遇到蓝球就往右指针扔
+            {
+                swap(a, right, i);
+                right--;
+            }
+        }
+    }
+
+    private void swap(int[] a, int i, int j) 
+    {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp; 
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Sort Colors. Retrieved from: <a href="https://www.lintcode.com/problem/sort-colors/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/sort-colors/description</a></p>
+<p>JiuZhang. (2018). Sort Colors. Retrieved from: <a href="https://www.jiuzhang.com/solution/sort-colors/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/sort-colors/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Two Pointer </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Minimum Window Substring]]></title>
+      <url>/2019/02/04/Two%20Pointer/Minimum%20Window%20Substring/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Minimum Window Substring</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Given a string source and a string target, find the minimum window in source which will contain all the characters in target.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Clarification</strong></font>
+
+<p>Should the characters in minimum window has the same order in target?</p>
+<p>Not necessary.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Example 1:</p>
+<pre><code>Input:
+&quot;&quot;
+&quot;&quot;
+Output:
+&quot;&quot;
+</code></pre><p>Example 2:</p>
+<pre><code>Input:
+&quot;ADOBECODEBANC&quot;
+&quot;ABC&quot;
+Output:
+&quot;BANC&quot;
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Challenge</strong></font>
+
+<p>Can you do it in time complexity O(n) ?</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1u0buapzej20r604t0t8.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    int initTargetHash(int []targethash, String Target) 
+    {
+        int targetnum =0 ;
+        for (char ch : Target.toCharArray()) 
+        {
+            targetnum++;  //目标字符串的总个数
+            targethash[ch]++;  //当前字符总出现个数
+        }
+        return targetnum;
+    }
+    //检查当前窗口中的Substring是否包含了目标字符串中全部字符
+    boolean valid(int []sourcehash, int []targethash) 
+    {
+        for(int i = 0; i &lt; 256; i++) 
+        {
+            if(targethash[i] &gt; sourcehash[i])    
+                return false;
+        }
+        return true;
+    }
+    public String minWindow(String Source, String Target) 
+    {
+        // queueing the position that matches the char in T
+        int ans = Integer.MAX_VALUE;
+        String minStr = &quot;&quot;;
+
+        int[] sourcehash = new int[256];
+        int[] targethash = new int[256];
+
+        initTargetHash(targethash, Target);
+        int j = 0, i = 0;
+        for(i = 0; i &lt; Source.length(); i++) 
+        {
+            while( !valid(sourcehash, targethash) &amp;&amp; j &lt; Source.length()  ) 
+            {
+                sourcehash[Source.charAt(j)]++;
+                j++;
+            }
+            if(valid(sourcehash, targethash) ) //每跟新一次左指针的时候,我们都需要update目标值(取最小区间)
+            {
+                if(ans &gt; j - i )   
+                {
+                    ans = Math.min(ans, j - i );
+                    minStr = Source.substring(i, j );
+                }
+            }
+            sourcehash[Source.charAt(i)]--;  //每到下一次循环的时候:都需要把当前左指针所占的空间删除掉
+        }
+        return minStr;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.lintcode.com/problem/minimum-window-substring/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/minimum-window-substring/description</a></p>
+<p>JiuZhang. (2018). Minimum Window Substring. Retrieved from: <a href="https://www.jiuzhang.com/solution/minimum-window-substring/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/minimum-window-substring/</a></p>
 ]]></content>
       
         <categories>
@@ -3455,6 +3467,81 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
     </entry>
     
     <entry>
+      <title><![CDATA[Divide Two Integers]]></title>
+      <url>/2019/02/02/Binary%20Search/Divide%20Two%20Integers/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Divide Two Integers</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p>Divide two integers without using multiplication, division and mod operator.</p>
+<p>If it is overflow, return 2147483647</p>
+<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
+
+<p>Given dividend = 100 and divisor = 9, return 11.</p>
+<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txxay3lfj20qt03iglt.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /**
+     * @param dividend: the dividend
+     * @param divisor: the divisor
+     * @return: the result
+     */
+    public int divide(int dividend, int divisor) 
+    {
+    //check the corner case 
+        if (divisor == 0)     //如果除数为0, 则被除数为正时，结果为正无穷，否则为负无穷
+        {
+             return dividend &gt;= 0? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        }
+
+        if (dividend == 0)  //如果被除数为0,则返回0
+        {
+            return 0;
+        }
+
+        if (dividend == Integer.MIN_VALUE &amp;&amp; divisor == -1)  //如果被除数为负无穷大,除数为-1,则返回正无穷大
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        boolean isNegative = (dividend &lt; 0 &amp;&amp; divisor &gt; 0) || 
+                             (dividend &gt; 0 &amp;&amp; divisor &lt; 0);  //记录结果符号(即是同号为+ ，异号为负)
+
+        //除数和被除数取绝对值,为了防止溢出，所以转换成long之后再取绝对值
+        long a = Math.abs((long)dividend);
+        long b = Math.abs((long)divisor);
+        int result = 0;
+        while(a &gt;= b)
+        {
+            int shift = 0;
+            while(a &gt;= (b &lt;&lt; shift)) //获取 商
+            {
+                shift++;
+            }
+            a -= b &lt;&lt; (shift - 1);
+            result += 1 &lt;&lt; (shift - 1);
+        }
+        return isNegative? -result: result;
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). Divide Two Integers. Retrieved from: <a href="https://www.lintcode.com/problem/divide-two-integers/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/divide-two-integers/description</a></p>
+<p>JiuZhang. (2018). Divide Two Integers. Retrieved from: <a href="https://www.jiuzhang.com/solution/divide-two-integers/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/divide-two-integers/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Search for a Range]]></title>
       <url>/2019/02/02/Binary%20Search/Search%20for%20a%20Range/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Search for a Range</strong></font><br></p>
@@ -3576,81 +3663,6 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
     </entry>
     
     <entry>
-      <title><![CDATA[Divide Two Integers]]></title>
-      <url>/2019/02/02/Binary%20Search/Divide%20Two%20Integers/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：Divide Two Integers</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p>Divide two integers without using multiplication, division and mod operator.</p>
-<p>If it is overflow, return 2147483647</p>
-<font color="#002060" size="5" face="Calibri"><strong>Example</strong></font>
-
-<p>Given dividend = 100 and divisor = 9, return 11.</p>
-<font color="#002060" size="5" face="Calibri"><strong>Thinking</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1txxay3lfj20qt03iglt.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /**
-     * @param dividend: the dividend
-     * @param divisor: the divisor
-     * @return: the result
-     */
-    public int divide(int dividend, int divisor) 
-    {
-    //check the corner case 
-        if (divisor == 0)     //如果除数为0, 则被除数为正时，结果为正无穷，否则为负无穷
-        {
-             return dividend &gt;= 0? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        }
-
-        if (dividend == 0)  //如果被除数为0,则返回0
-        {
-            return 0;
-        }
-
-        if (dividend == Integer.MIN_VALUE &amp;&amp; divisor == -1)  //如果被除数为负无穷大,除数为-1,则返回正无穷大
-        {
-            return Integer.MAX_VALUE;
-        }
-
-        boolean isNegative = (dividend &lt; 0 &amp;&amp; divisor &gt; 0) || 
-                             (dividend &gt; 0 &amp;&amp; divisor &lt; 0);  //记录结果符号(即是同号为+ ，异号为负)
-
-        //除数和被除数取绝对值,为了防止溢出，所以转换成long之后再取绝对值
-        long a = Math.abs((long)dividend);
-        long b = Math.abs((long)divisor);
-        int result = 0;
-        while(a &gt;= b)
-        {
-            int shift = 0;
-            while(a &gt;= (b &lt;&lt; shift)) //获取 商
-            {
-                shift++;
-            }
-            a -= b &lt;&lt; (shift - 1);
-            result += 1 &lt;&lt; (shift - 1);
-        }
-        return isNegative? -result: result;
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). Divide Two Integers. Retrieved from: <a href="https://www.lintcode.com/problem/divide-two-integers/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/divide-two-integers/description</a></p>
-<p>JiuZhang. (2018). Divide Two Integers. Retrieved from: <a href="https://www.jiuzhang.com/solution/divide-two-integers/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/divide-two-integers/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Binary Search </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[wood-cut]]></title>
       <url>/2019/02/02/Binary%20Search/wood-cut/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：wood-cut</strong></font><br></p>
@@ -3731,6 +3743,61 @@ Given [1, 2, 3, 4, 5] and target = 6, return 0.
     </entry>
     
     <entry>
+      <title><![CDATA[maximum number in mountain sequence]]></title>
+      <url>/2019/02/02/Binary%20Search/maximum%20number%20in%20mountain%20sequence/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：maximum number in mountain sequence</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
+
+<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty30rzgzj20re093wf5.jpg" alt=""></p>
+<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
+
+<pre><code>public class Solution {
+    /*
+     * @param nums: a mountain sequence which increase firstly and then decrease
+     * @return: then mountain top
+     */
+    public int mountainSequence(int[] nums) 
+    {
+        // check the corner case
+        if (nums == null || nums.length == 0)
+        {
+            throw new IllegalArgumentException();
+        }
+
+        int start = 0;
+        int end = nums.length - 1;
+        int mid; 
+
+        while (start + 1 &lt; end)
+        {
+            mid = start + (end - start) / 2 
+            if (nums[mid + 1] - nums[mid] &gt; 0)
+            {
+                start = mid;
+            } 
+            else 
+            {
+                end = mid;
+            }
+        }
+        return Math.max (nums[start], nums[end]);            
+    }
+}
+</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>LintCode. (2018). maximum number in mountain sequence. Retrieved from: <a href="https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Binary Search </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[First Bad Version]]></title>
       <url>/2019/02/02/Binary%20Search/First%20Bad%20Version/</url>
       <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：First Bad Version</strong></font><br></p>
@@ -3790,61 +3857,6 @@ public class Solution {
 
 <p>LintCode. (2018). First Bad Version. Retrieved from: <a href="https://www.lintcode.com/problem/first-bad-version/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/first-bad-version/description</a></p>
 <p>JiuZhang. (2018). First Bad Version. Retrieved from: <a href="https://www.jiuzhang.com/solution/first-bad-version/" target="_blank" rel="noopener">https://www.jiuzhang.com/solution/first-bad-version/</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> Binary Search </category>
-            
-        </categories>
-        
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[maximum number in mountain sequence]]></title>
-      <url>/2019/02/02/Binary%20Search/maximum%20number%20in%20mountain%20sequence/</url>
-      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Question：maximum number in mountain sequence</strong></font><br></p>
-<font color="#002060" size="5" face="Calibri"><strong>Description</strong></font>
-
-<p><img src="http://ww1.sinaimg.cn/large/6ab130e7gy1g1ty30rzgzj20re093wf5.jpg" alt=""></p>
-<font color="#002060" size="5" face="Calibri"><strong>Coding</strong></font>
-
-<pre><code>public class Solution {
-    /*
-     * @param nums: a mountain sequence which increase firstly and then decrease
-     * @return: then mountain top
-     */
-    public int mountainSequence(int[] nums) 
-    {
-        // check the corner case
-        if (nums == null || nums.length == 0)
-        {
-            throw new IllegalArgumentException();
-        }
-
-        int start = 0;
-        int end = nums.length - 1;
-        int mid; 
-
-        while (start + 1 &lt; end)
-        {
-            mid = start + (end - start) / 2 
-            if (nums[mid + 1] - nums[mid] &gt; 0)
-            {
-                start = mid;
-            } 
-            else 
-            {
-                end = mid;
-            }
-        }
-        return Math.max (nums[start], nums[end]);            
-    }
-}
-</code></pre><font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
-
-<p>LintCode. (2018). maximum number in mountain sequence. Retrieved from: <a href="https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description" target="_blank" rel="noopener">https://www.lintcode.com/problem/maximum-number-in-mountain-sequence/description</a></p>
 ]]></content>
       
         <categories>
@@ -7367,6 +7379,65 @@ public class Solution {
         <categories>
             
             <category> LinkedList </category>
+            
+        </categories>
+        
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Unity Game Optimization]]></title>
+      <url>/2019/01/12/Game%20Optimization/Unity%20Game%20Optimization/</url>
+      <content type="html"><![CDATA[<p><br><font color="#002060" size="6" face="Calibri"><strong>Unity项目常见的优化点</strong></font><br></p>
+<font color="#002060" size="5" face="Calibri"><strong>UI内存优化</strong></font>
+
+<p>任何的UI图集最大size 1024*1024（内存优化）</p>
+<p>同一个界面出现的UI资源尽量放到一个图集，重复利用的公用资源放common（DrawCall优化）</p>
+<p>能用九宫格的尽量用九宫格来减小原图大小（内存优化）</p>
+<p>美术给过来的UI原图size 尽量小，还可以在这个网站(<a href="https://tinypng.com/" target="_blank" rel="noopener">https://tinypng.com/</a>) 上进行做优化处理, 对于一些全屏的loading 原画图，原画大小是1136<em>640（我们UI 的标准分辨率），让美术按照比例高度缩小到500，这样一张1024</em>1024的图集就可以放两张原图了，提升图集利用率。对于一些600<em>400 类似大小的原图，就尽量按比例把最长边压小到500，这样出来的图集就是512</em>512 而不是1024*1024（内存优化）</p>
+<p>对于特别长条的UI原图，例如1000<em>100，如果由于加入这个长条的原图导致图集大小变大而且利用率很低的话，要把1000</em>100的原图拆分成两张图500*100，在制作界面的时候用两个Image拼接即可，这样可以把1024 的图集缩小到512（内存优化）</p>
+<p>图集利用率低于1/3的时候，要考虑和其他同一个size 的图集合并以提升利用率。合并的原则是不改变任何一个图集的大小，这样即可完全省掉一张图集（内存优化、安装包量优化）</p>
+<p>尽量复用UI资源，减少不必要的原图，例如一个卡牌分了五种品质原画底图，白蓝黄绿紫，就不要使用五张大底图了，让美术同事画一个灰色原图，Image在使用的时候直接按需求修改顶点色即可（内存优化）</p>
+<p>关闭mipmaps（内存优化）</p>
+<p>能用正方形的图尽量出正方式的图片,或者2的整次幂正方形图片，这样子在ios平台的图片压缩格式(RGBA Compressed PVRTC 4 bits)就不会变形</p>
+<font color="#002060" size="5" face="Calibri"><strong>OverDraw 优化 (某一个像素在同一帧的时间内被绘制了多次)</strong></font>
+
+<p>对于九宫格的Image，如果去掉fillcenter 不影响最后出来的效果就要把fillcenter 去掉，可以减少中间一片的像素绘制；</p>
+<p>看不见的元素且没有逻辑功能要disable 或者挪出裁剪区域，而不要通过设置Alpha=0 来隐藏；</p>
+<p>不要使用一张Alpha=0 的Image 来实现放大响应区域的功能；</p>
+<p>UI 底层系统来控制隐藏看不见的元素，例如打开全屏UI 的时候把下面看不见的UI 挪出裁减区域、关闭主相机渲染。</p>
+<font color="#002060" size="5" face="Calibri"><strong>DrawCall 优化</strong></font>
+
+<p>合理分配图集，同一个界面上的图尽量打到一个图集，多个界面复用的图，放到common；</p>
+<p>Text 本身也是用的Font Texture，不同字体的Text 也是来自不同的图集，所以在布局界面的时候也要尽量避免穿插打断绘制流程;  NGUI 字体的深度不能与Sprite深度交叉，字体的深度最好放在最上层</p>
+<p>Image 能用Simple 模式的尽量用Simple 模式。在项目组中经常遇到的一种情况是，以前的需求是这个Image 用九宫格，后来需求变动不需要九宫格了，但是没有把ImageType 切换会Simple 从而导致多余的顶点数</p>
+<p>Text 控件尽量不要去添加Shadow、Outline 效果，特别是Outline！NGUI的Outline网格数增加了4倍或8倍, 这对CPU 和GPU都很伤。策划<br>和美术想要的文字凸显的效果可以用背景和文字配色来实现，效果实在无法接受的可以少量使用Shadow。对于频繁变动的Text 文本（例如聊天），更要慎重考虑是否使用Shadow、Outline</p>
+<p>游戏中难免有UI频繁移动、缩放、变颜色的需求，既然一定要变动，那我们就让这些频繁变动的UI 元素单独放在一个Canvas下，且尽量减少这个频繁变动的Canvas 下的顶点数量。简单的概括一句优化思路就是：动静分离，图集也是一样考虑动的UI和静的UI分离</p>
+<font color="#002060" size="5" face="Calibri"><strong>其他卡顿优化</strong></font>
+
+<p>精简拆分UIPrefab 文件，把打开界面瞬间看不见的UI 元素尽量拆分，功能逻辑触发其他UI元素时再动态加载，例如：背包、练鼎根据子页签内容拆分，这样可以减少打开UI 时卡顿的感觉；</p>
+<p>对于ScrollRect里存在非常多元素的界面，避免一次全部Initiation，回收重复里节点元素，刷新数据即可（可以实现一个公用组件）；</p>
+<p>不要使用Text 的Best Fit 选项，有额外开销；</p>
+<p>对部分UI 有频繁显示和隐藏需求的，建议不要直接调用SetActive，上面有提到这样会导致顶点数据重新生成，过于频繁调用有性能问题。有两个建议：挪出裁减区域或者禁用CanvasRender，具体采用什么方案要看需求，因为禁用CanvasRender 还是会响应事件测。</p>
+<font color="#002060" size="5" face="Calibri"><strong>Lua注意点</strong></font>
+
+<p>字符串连接要使用table.concat</p>
+<p>使用pairs代替next</p>
+<p>减少unpack函数的使用</p>
+<p>lua配置表里面存着好多参数，可以把里面的参数名去掉，在注释里面标明清楚</p>
+<p>使用局部变量，能用local就得要用local</p>
+<p>尽量不要在一个表中混合使用数组和散列桶部分，即是一个表最好存放一类数组</p>
+<p>尽量避免重新散列操作，当定义一个空表的时候, 最好在里面优先填充数据</p>
+<p>os.clock 不能用，在不同的平台上有着不一样的标准</p>
+<p>在ulua开发中，coroutine.running()这个方法在主线程调用的时候是无法获得当前协程的id的，以为此时协程并没有执行（因为协程是在主线程执行的，此时已被挂起或销毁）。只有在协程的代码块中才能正确获取当前的协程id，在主线程中调用时候应该获得的是主线程id，测试时候主线程获得的id是固定的，而在协程中获得的id是随协程切换而变化的，所以当游戏开发时，停止当前线程的话，先在主线程获取固定的id， 然后再用coroutine.stop停掉当前线程</p>
+<font color="#002060" size="5" face="Calibri"><strong>Reference</strong></font>
+
+<p>腾讯学院. (2018). 2018腾讯移动游戏技术评审标准与实践案例. Retrieved from: <a href="https://gameinstitute.qq.com/tech-ebook" target="_blank" rel="noopener">https://gameinstitute.qq.com/tech-ebook</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Game Optimization </category>
             
         </categories>
         
